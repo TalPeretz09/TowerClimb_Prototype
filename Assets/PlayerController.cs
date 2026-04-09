@@ -107,23 +107,30 @@ public class PlayerController : MonoBehaviour
     {
         Vector3Int front = gridPosition + currentFacing;
 
+        // PUSH / PULL
         if (interactHeld && HasBlock(front))
         {
-            // PUSH
             if (dir == currentFacing)
             {
                 PushBlock(front, dir);
+                return;
             }
-            // PULL
             else if (dir == -currentFacing)
             {
                 PullBlock(front, dir);
+                return;
             }
         }
-        else
+
+        //  CLIMB (NEW)
+        if (dir == currentFacing && CanClimb(dir))
         {
-            TryMove(dir);
+            TryClimb(dir);
+            return;
         }
+
+        //  NORMAL MOVE
+        TryMove(dir);
     }
 
     // =========================
@@ -141,6 +148,26 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
+    // CLIMB UP
+    // =========================
+    bool CanClimb(Vector3Int dir)
+    {
+        Vector3Int front = gridPosition + dir;
+        Vector3Int aboveFront = front + Vector3Int.up;
+
+        return HasBlock(front) && !HasBlock(aboveFront);
+    }
+
+    void TryClimb(Vector3Int dir)
+    {
+        Vector3Int front = gridPosition + dir;
+        Vector3Int aboveFront = front + Vector3Int.up;
+
+        gridPosition = aboveFront;
+        transform.position = gridPosition;
+    }
+
+    // =========================
     // PUSH
     // =========================
     void PushBlock(Vector3Int blockPos, Vector3Int dir)
@@ -150,9 +177,7 @@ public class PlayerController : MonoBehaviour
         if (!HasBlock(target))
         {
             MoveBlock(blockPos, target);
-
-            gridPosition += dir;
-            transform.position = gridPosition;
+            //DO NOT move player
         }
     }
 
@@ -163,7 +188,7 @@ public class PlayerController : MonoBehaviour
     {
         Vector3Int behind = gridPosition + dir;
 
-        if (!HasBlock(behind))
+        if (!HasBlock(behind) && CanStand(behind))
         {
             MoveBlock(blockPos, gridPosition);
 
