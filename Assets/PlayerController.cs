@@ -15,7 +15,7 @@ public class PlayerController : MonoBehaviour
 
     // TIMING
     float moveHoldTime = 0f;
-    float holdThreshold = 0.2f;
+    float holdThreshold = 0.1f;
 
     // CAMERA
     [Header("Camera")]
