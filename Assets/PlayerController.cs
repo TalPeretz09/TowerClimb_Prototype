@@ -234,6 +234,7 @@ public class PlayerController : MonoBehaviour
             {
                 blocksToMove[i].position += (Vector3)dir;
             }
+            Physics.SyncTransforms(); // Forces Unity's physics to catch up immediately!
         }
     }
 
@@ -286,6 +287,7 @@ public class PlayerController : MonoBehaviour
         if (hits.Length > 0)
         {
             hits[0].transform.position = to;
+            Physics.SyncTransforms(); // Forces Unity's physics to catch up immediately!
         }
     }
 
