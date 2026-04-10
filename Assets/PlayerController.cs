@@ -86,7 +86,7 @@ public class PlayerController : MonoBehaviour
         // TAP ? rotate only
         if (moveHoldTime < holdThreshold)
         {
-            if (currentFacing != dir)
+            if (!interactHeld && currentFacing != dir)
             {
                 currentFacing = dir;
                 RotatePlayer(dir);
@@ -105,31 +105,34 @@ public class PlayerController : MonoBehaviour
     // =========================
     void TryMoveOrPush(Vector3Int dir)
     {
-        Vector3Int front = gridPosition + currentFacing;
+        Vector3Int front = gridPosition + currentFacing; // ?? FIXED
 
-        // PUSH / PULL
         if (interactHeld && HasBlock(front))
         {
-            if (dir == currentFacing)
+            float dot = Vector3.Dot((Vector3)dir, (Vector3)currentFacing);
+
+            // PUSH (same direction)
+            if (dot > 0)
             {
-                PushBlock(front, dir);
+                PushBlock(front, currentFacing);
                 return;
             }
-            else if (dir == -currentFacing)
+            // PULL (opposite direction)
+            else if (dot < 0)
             {
-                PullBlock(front, dir);
+                PullBlock(front, -currentFacing);
                 return;
             }
         }
 
-        //  CLIMB (NEW)
+        // CLIMB
         if (dir == currentFacing && CanClimb(dir))
         {
             TryClimb(dir);
             return;
         }
 
-        //  NORMAL MOVE
+        // MOVE
         TryMove(dir);
     }
 
@@ -186,7 +189,7 @@ public class PlayerController : MonoBehaviour
     // =========================
     void PullBlock(Vector3Int blockPos, Vector3Int dir)
     {
-        Vector3Int behind = gridPosition + dir;
+        Vector3Int behind = gridPosition - currentFacing;
 
         if (!HasBlock(behind) && CanStand(behind))
         {
