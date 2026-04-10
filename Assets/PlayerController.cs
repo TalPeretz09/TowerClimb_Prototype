@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections.Generic;
 
 public class PlayerController : MonoBehaviour
 {
@@ -200,14 +201,34 @@ public class PlayerController : MonoBehaviour
     // =========================
     // PUSH
     // =========================
-    void PushBlock(Vector3Int blockPos, Vector3Int dir)
+    void PushBlock(Vector3Int startBlockPos, Vector3Int dir)
     {
-        Vector3Int target = blockPos + dir;
+        List<Transform> blocksToMove = new List<Transform>();
+        Vector3Int checkPos = startBlockPos;
 
-        if (!HasBlock(target))
+        while (HasBlock(checkPos))
         {
-            MoveBlock(blockPos, target);
-            // DO NOT move player
+            Collider[] hits = Physics.OverlapBox(
+                checkPos,
+                Vector3.one * 0.4f,
+                Quaternion.identity,
+                LayerMask.GetMask("Block")
+            );
+
+            if (hits.Length > 0)
+            {
+                blocksToMove.Add(hits[0].transform);
+            }
+
+            checkPos += dir;
+        }
+
+        if (!HasBlock(checkPos))
+        {
+            for (int i = blocksToMove.Count - 1; i >= 0; i--)
+            {
+                blocksToMove[i].position += (Vector3)dir;
+            }
         }
     }
 
