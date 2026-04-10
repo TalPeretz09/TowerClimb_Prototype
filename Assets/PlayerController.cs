@@ -84,10 +84,15 @@ public class PlayerController : MonoBehaviour
 
         moveHoldTime += Time.deltaTime;
 
+        // Check if we are actively grabbing a block (Interact is held AND a block is in front of us)
+        Vector3Int front = gridPosition + currentFacing;
+        bool isGrabbing = interactHeld && HasBlock(front);
+
         // TAP -> rotate only
         if (moveHoldTime < holdThreshold)
         {
-            if (!interactHeld && currentFacing != dir)
+            // Only prevent rotation if we are ACTUALLY grabbing a block
+            if (!isGrabbing && currentFacing != dir)
             {
                 currentFacing = dir;
                 RotatePlayer(dir);
