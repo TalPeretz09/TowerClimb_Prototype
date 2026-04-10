@@ -56,7 +56,7 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
-    // INPUT ? GRID DIRECTION
+    // INPUT -> GRID DIRECTION
     // =========================
     Vector3Int GetGridDirection(Vector2 input)
     {
@@ -83,7 +83,7 @@ public class PlayerController : MonoBehaviour
 
         moveHoldTime += Time.deltaTime;
 
-        // TAP ? rotate only
+        // TAP -> rotate only
         if (moveHoldTime < holdThreshold)
         {
             if (!interactHeld && currentFacing != dir)
@@ -92,7 +92,7 @@ public class PlayerController : MonoBehaviour
                 RotatePlayer(dir);
             }
         }
-        // HOLD ? move / push / pull
+        // HOLD -> move / push / pull
         else
         {
             TryMoveOrPush(dir);
@@ -105,7 +105,7 @@ public class PlayerController : MonoBehaviour
     // =========================
     void TryMoveOrPush(Vector3Int dir)
     {
-        Vector3Int front = gridPosition + currentFacing; // ?? FIXED
+        Vector3Int front = gridPosition + currentFacing;
 
         if (interactHeld && HasBlock(front))
         {
@@ -125,10 +125,17 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        // CLIMB
+        // CLIMB UP
         if (dir == currentFacing && CanClimb(dir))
         {
             TryClimb(dir);
+            return;
+        }
+
+        // CLIMB DOWN
+        if (dir == currentFacing && CanClimbDown(dir))
+        {
+            TryClimbDown(dir);
             return;
         }
 
@@ -171,6 +178,26 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
+    // CLIMB DOWN
+    // =========================
+    bool CanClimbDown(Vector3Int dir)
+    {
+        Vector3Int front = gridPosition + dir;
+        Vector3Int frontDown = front + Vector3Int.down;
+
+        // Space in front is clear, space diagonally down is clear, and we have a floor beneath that.
+        return !HasBlock(front) && !HasBlock(frontDown) && CanStand(frontDown);
+    }
+
+    void TryClimbDown(Vector3Int dir)
+    {
+        Vector3Int frontDown = gridPosition + dir + Vector3Int.down;
+
+        gridPosition = frontDown;
+        transform.position = gridPosition;
+    }
+
+    // =========================
     // PUSH
     // =========================
     void PushBlock(Vector3Int blockPos, Vector3Int dir)
@@ -180,7 +207,7 @@ public class PlayerController : MonoBehaviour
         if (!HasBlock(target))
         {
             MoveBlock(blockPos, target);
-            //DO NOT move player
+            // DO NOT move player
         }
     }
 
