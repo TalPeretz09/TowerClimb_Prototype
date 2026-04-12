@@ -14,6 +14,9 @@ public class PlayerController : MonoBehaviour
     public Vector3Int gridPosition;
     Vector3Int currentFacing = Vector3Int.forward;
 
+    // STATE
+    public bool isHanging = false;
+
     // TIMING
     float moveHoldTime = 0f;
     float holdThreshold = 0.1f;
@@ -84,14 +87,24 @@ public class PlayerController : MonoBehaviour
 
         moveHoldTime += Time.deltaTime;
 
-        // Check if we are actively grabbing a block (Interact is held AND a block is in front of us)
+        // --- HANGING STATE ---
+        if (isHanging)
+        {
+            if (moveHoldTime >= holdThreshold)
+            {
+                TryHangMovement(dir);
+                moveHoldTime = 0f;
+            }
+            return;
+        }
+
+        // --- NORMAL STATE ---
         Vector3Int front = gridPosition + currentFacing;
         bool isGrabbing = interactHeld && HasBlock(front);
 
         // TAP -> rotate only
         if (moveHoldTime < holdThreshold)
         {
-            // Only prevent rotation if we are ACTUALLY grabbing a block
             if (!isGrabbing && currentFacing != dir)
             {
                 currentFacing = dir;
@@ -103,6 +116,93 @@ public class PlayerController : MonoBehaviour
         {
             TryMoveOrPush(dir);
             moveHoldTime = 0f;
+        }
+    }
+
+    // =========================
+    // HANGING MOVEMENT
+    // =========================
+    void TryHangMovement(Vector3Int dir)
+    {
+        // 1. CLIMB UP (Release Hang)
+        if (dir == currentFacing)
+        {
+            // FIX: The block we are holding is at our exact Y level.
+            // To stand on it, we just check the space directly above it.
+            Vector3Int standPos = gridPosition + currentFacing + Vector3Int.up;
+
+            if (!HasBlock(standPos))
+            {
+                isHanging = false;
+                gridPosition = standPos;
+                transform.position = gridPosition;
+                RotatePlayer(currentFacing);
+            }
+        }
+        // 2. DROP DOWN (Release Hang)
+        else if (dir == -currentFacing)
+        {
+            isHanging = false;
+
+            // Check if we are dropping onto a solid floor
+            if (CanStand(gridPosition))
+            {
+                // Just stand in place
+            }
+            else
+            {
+                // Otherwise fall down 1 block
+                Vector3Int dropPos = gridPosition + Vector3Int.down;
+                if (!HasBlock(dropPos))
+                {
+                    gridPosition = dropPos;
+                    transform.position = gridPosition;
+                }
+            }
+            RotatePlayer(currentFacing);
+        }
+        // 3. SHIMMY (Left / Right)
+        else
+        {
+            float dot = Vector3.Dot((Vector3)dir, (Vector3)currentFacing);
+
+            if (Mathf.Abs(dot) < 0.1f)
+            {
+                Vector3Int targetPos = gridPosition + dir;
+                Vector3Int targetHeadPos = targetPos + Vector3Int.up;
+
+                // FIX: The edge we want to grab is at the same Y-level as our body
+                Vector3Int targetGrabBlock = targetPos + currentFacing;
+
+                // OPTION 1: Straight Shimmy
+                if (!HasBlock(targetPos) && !HasBlock(targetHeadPos) && HasBlock(targetGrabBlock))
+                {
+                    gridPosition = targetPos;
+                    transform.position = gridPosition;
+                }
+                // OPTION 2: Outside Corner Swing
+                else if (!HasBlock(targetPos) && !HasBlock(targetHeadPos) && !HasBlock(targetGrabBlock))
+                {
+                    Vector3Int diagonalPos = targetPos + currentFacing;
+                    Vector3Int diagonalHeadPos = diagonalPos + Vector3Int.up;
+
+                    if (!HasBlock(diagonalPos) && !HasBlock(diagonalHeadPos))
+                    {
+                        gridPosition = diagonalPos;
+                        currentFacing = -dir;
+                        transform.position = gridPosition;
+                        RotatePlayer(currentFacing);
+                    }
+                }
+                // OPTION 3: Inside Corner Grab (BONUS)
+                else if (HasBlock(targetPos))
+                {
+                    // If the space to our side is blocked, we don't move position,
+                    // we just turn 90 degrees to hold onto that new wall!
+                    currentFacing = dir;
+                    RotatePlayer(currentFacing);
+                }
+            }
         }
     }
 
@@ -161,6 +261,20 @@ public class PlayerController : MonoBehaviour
             gridPosition = target;
             transform.position = gridPosition;
         }
+        else
+        {
+            // ENTER HANG STATE: Walk off a 2-block drop ledge
+            Vector3Int targetDown = target + Vector3Int.down;
+
+            if (!HasBlock(target) && !HasBlock(targetDown))
+            {
+                isHanging = true;
+                gridPosition = targetDown;
+                currentFacing = -dir;
+                transform.position = gridPosition;
+                RotatePlayer(currentFacing);
+            }
+        }
     }
 
     // =========================
@@ -191,7 +305,6 @@ public class PlayerController : MonoBehaviour
         Vector3Int front = gridPosition + dir;
         Vector3Int frontDown = front + Vector3Int.down;
 
-        // Space in front is clear, space diagonally down is clear, and we have a floor beneath that.
         return !HasBlock(front) && !HasBlock(frontDown) && CanStand(frontDown);
     }
 
@@ -234,7 +347,7 @@ public class PlayerController : MonoBehaviour
             {
                 blocksToMove[i].position += (Vector3)dir;
             }
-            Physics.SyncTransforms(); // Forces Unity's physics to catch up immediately!
+            Physics.SyncTransforms();
         }
     }
 
@@ -245,12 +358,24 @@ public class PlayerController : MonoBehaviour
     {
         Vector3Int behind = gridPosition - currentFacing;
 
-        if (!HasBlock(behind) && CanStand(behind))
+        if (!HasBlock(behind))
         {
             MoveBlock(blockPos, gridPosition);
 
-            gridPosition = behind;
-            transform.position = gridPosition;
+            if (CanStand(behind))
+            {
+                gridPosition = behind;
+                transform.position = gridPosition;
+            }
+            else
+            {
+                // ENTER HANG STATE: Pull block and step back into empty air
+                isHanging = true;
+                gridPosition = behind + Vector3Int.down;
+                transform.position = gridPosition;
+                RotatePlayer(currentFacing);
+            }
+            Physics.SyncTransforms();
         }
     }
 
@@ -287,17 +412,27 @@ public class PlayerController : MonoBehaviour
         if (hits.Length > 0)
         {
             hits[0].transform.position = to;
-            Physics.SyncTransforms(); // Forces Unity's physics to catch up immediately!
+            Physics.SyncTransforms();
         }
     }
 
     // =========================
-    // ROTATION
+    // ROTATION (With Hang Tilt)
     // =========================
     void RotatePlayer(Vector3Int dir)
     {
         Vector3 forward = new Vector3(dir.x, 0, dir.z);
-        transform.forward = forward;
+
+        if (isHanging)
+        {
+            // Tilt forward slightly towards the block
+            transform.rotation = Quaternion.LookRotation(forward) * Quaternion.Euler(15f, 0, 0);
+        }
+        else
+        {
+            // Normal upright rotation
+            transform.rotation = Quaternion.LookRotation(forward);
+        }
     }
 
     // =========================
