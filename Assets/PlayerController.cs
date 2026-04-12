@@ -25,6 +25,7 @@ public class PlayerController : MonoBehaviour
     [Header("Camera")]
     public Transform cameraPivot;
     public float cameraSpeed = 120f;
+    public float cameraFollowSpeed = 5f; // New: Controls how snappy or floaty the camera tracks upward
 
     void Awake()
     {
@@ -47,6 +48,14 @@ public class PlayerController : MonoBehaviour
     {
         gridPosition = Vector3Int.RoundToInt(transform.position);
         transform.position = gridPosition;
+
+        // Snap the camera to the player's starting height immediately
+        if (cameraPivot != null)
+        {
+            Vector3 startPos = cameraPivot.position;
+            startPos.y = transform.position.y;
+            cameraPivot.position = startPos;
+        }
     }
 
     void Update()
@@ -127,8 +136,6 @@ public class PlayerController : MonoBehaviour
         // 1. CLIMB UP (Release Hang)
         if (dir == currentFacing)
         {
-            // FIX: The block we are holding is at our exact Y level.
-            // To stand on it, we just check the space directly above it.
             Vector3Int standPos = gridPosition + currentFacing + Vector3Int.up;
 
             if (!HasBlock(standPos))
@@ -144,14 +151,12 @@ public class PlayerController : MonoBehaviour
         {
             isHanging = false;
 
-            // Check if we are dropping onto a solid floor
             if (CanStand(gridPosition))
             {
                 // Just stand in place
             }
             else
             {
-                // Otherwise fall down 1 block
                 Vector3Int dropPos = gridPosition + Vector3Int.down;
                 if (!HasBlock(dropPos))
                 {
@@ -170,8 +175,6 @@ public class PlayerController : MonoBehaviour
             {
                 Vector3Int targetPos = gridPosition + dir;
                 Vector3Int targetHeadPos = targetPos + Vector3Int.up;
-
-                // FIX: The edge we want to grab is at the same Y-level as our body
                 Vector3Int targetGrabBlock = targetPos + currentFacing;
 
                 // OPTION 1: Straight Shimmy
@@ -194,11 +197,9 @@ public class PlayerController : MonoBehaviour
                         RotatePlayer(currentFacing);
                     }
                 }
-                // OPTION 3: Inside Corner Grab (BONUS)
+                // OPTION 3: Inside Corner Grab
                 else if (HasBlock(targetPos))
                 {
-                    // If the space to our side is blocked, we don't move position,
-                    // we just turn 90 degrees to hold onto that new wall!
                     currentFacing = dir;
                     RotatePlayer(currentFacing);
                 }
@@ -425,12 +426,10 @@ public class PlayerController : MonoBehaviour
 
         if (isHanging)
         {
-            // Tilt forward slightly towards the block
             transform.rotation = Quaternion.LookRotation(forward) * Quaternion.Euler(15f, 0, 0);
         }
         else
         {
-            // Normal upright rotation
             transform.rotation = Quaternion.LookRotation(forward);
         }
     }
@@ -440,7 +439,17 @@ public class PlayerController : MonoBehaviour
     // =========================
     void HandleCamera()
     {
+        if (cameraPivot == null) return;
+
+        // 1. Pivot Rotation (Horizontal)
         float rotation = lookInput.x * cameraSpeed * Time.deltaTime;
         cameraPivot.Rotate(Vector3.up, rotation);
+
+        // 2. Smooth Vertical Tracking
+        // Keeps the X and Z exactly where you placed the pivot, but smoothly slides Y to match the player
+        float targetY = transform.position.y;
+        Vector3 targetPos = new Vector3(cameraPivot.position.x, targetY, cameraPivot.position.z);
+
+        cameraPivot.position = Vector3.Lerp(cameraPivot.position, targetPos, cameraFollowSpeed * Time.deltaTime);
     }
 }
