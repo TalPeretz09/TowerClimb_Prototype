@@ -60,7 +60,40 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        // NEW: Only allow movement if the game is actually playing
+        if (GameManager.Instance != null && !GameManager.Instance.isPlaying)
+        {
+            moveHoldTime = 0f; // Reset move hold so they don't buffer inputs
+            return;
+        }
+
         HandleMovement();
+        CheckForVictory(); // NEW: Check if we've reached the top
+    }
+
+    // =========================
+    // VICTORY CHECK
+    // =========================
+    void CheckForVictory()
+    {
+        // Check the block directly beneath the player's feet
+        Vector3Int feetPos = gridPosition + Vector3Int.down;
+
+        Collider[] hits = Physics.OverlapBox(
+            feetPos,
+            Vector3.one * 0.4f,
+            Quaternion.identity,
+            LayerMask.GetMask("Block")
+        );
+
+        foreach (Collider hit in hits)
+        {
+            // If the block we are standing on has the tag "Victory"
+            if (hit.CompareTag("Victory"))
+            {
+                GameManager.Instance.WinGame();
+            }
+        }
     }
 
     void LateUpdate()
