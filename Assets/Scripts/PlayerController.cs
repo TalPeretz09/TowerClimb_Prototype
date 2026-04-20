@@ -478,10 +478,9 @@ public class PlayerController : MonoBehaviour
         float rotation = lookInput.x * cameraSpeed * Time.deltaTime;
         cameraPivot.Rotate(Vector3.up, rotation);
 
-        // 2. Smooth Vertical Tracking
-        // Keeps the X and Z exactly where you placed the pivot, but smoothly slides Y to match the player
-        float targetY = transform.position.y;
-        Vector3 targetPos = new Vector3(cameraPivot.position.x, targetY, cameraPivot.position.z);
+        // 2. Smooth Omnidirectional Tracking
+        // NEW: Now targets the player's exact X, Y, and Z position
+        Vector3 targetPos = transform.position;
 
         cameraPivot.position = Vector3.Lerp(cameraPivot.position, targetPos, cameraFollowSpeed * Time.deltaTime);
     }
