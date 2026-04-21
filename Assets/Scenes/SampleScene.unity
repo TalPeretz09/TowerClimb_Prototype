@@ -35933,7 +35933,7 @@ GameObject:
   - component: {fileID: 1937036273}
   - component: {fileID: 1937036272}
   m_Layer: 6
-  m_Name: BasicBlock (227)
+  m_Name: VictoryBlock
   m_TagString: Victory
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
