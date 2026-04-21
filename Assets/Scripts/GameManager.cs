@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
     [Header("UI Panels")]
     public GameObject startPanel;
     public GameObject winPanel;
+    public GameObject losePanel;
 
     [Header("UI Text Elements")]
     public TextMeshProUGUI countdownText;
@@ -32,6 +33,7 @@ public class GameManager : MonoBehaviour
         // Setup initial UI state
         startPanel.SetActive(true);
         winPanel.SetActive(false);
+        losePanel.SetActive(false);
         countdownText.gameObject.SetActive(false);
         timerText.gameObject.SetActive(false);
     }
@@ -85,6 +87,12 @@ public class GameManager : MonoBehaviour
         winPanel.SetActive(true);
 
         UpdateTimerDisplay(gameTimer, finalTimeText);
+    }
+
+    public void LoseGame()
+    {
+        isPlaying = false; // Stop the timer and inputs
+        losePanel.SetActive(true); // Turn on the UI canvas you made
     }
 
     // Called by the UI "Restart Button"

@@ -164,6 +164,9 @@ public class PlayerController : MonoBehaviour
     // =========================
     // HANGING MOVEMENT
     // =========================
+    // =========================
+    // HANGING MOVEMENT
+    // =========================
     void TryHangMovement(Vector3Int dir)
     {
         // 1. CLIMB UP (Release Hang)
@@ -184,20 +187,39 @@ public class PlayerController : MonoBehaviour
         {
             isHanging = false;
 
-            if (CanStand(gridPosition))
+            Vector3Int searchPos = gridPosition;
+            bool foundFloor = false;
+
+            // Search downward. The limit of 200 prevents infinite loops in case of a bug.
+            for (int i = 0; i < 200; i++)
             {
-                // Just stand in place
+                if (CanStand(searchPos))
+                {
+                    foundFloor = true;
+                    break; // Floor found, stop searching!
+                }
+                searchPos += Vector3Int.down;
+            }
+
+            if (foundFloor)
+            {
+                // Snap player directly to the block we found below them
+                gridPosition = searchPos;
+                transform.position = gridPosition;
+                RotatePlayer(currentFacing);
             }
             else
             {
-                Vector3Int dropPos = gridPosition + Vector3Int.down;
-                if (!HasBlock(dropPos))
+                // No floor found below - the player has fallen into the abyss!
+                if (GameManager.Instance != null)
                 {
-                    gridPosition = dropPos;
-                    transform.position = gridPosition;
+                    // Call the method to activate your new lose panel
+                    GameManager.Instance.LoseGame();
                 }
+
+                // Destroy the player character
+                Destroy(gameObject);
             }
-            RotatePlayer(currentFacing);
         }
         // 3. SHIMMY (Left / Right)
         else
@@ -289,6 +311,12 @@ public class PlayerController : MonoBehaviour
     void TryMove(Vector3Int dir)
     {
         Vector3Int target = gridPosition + dir;
+
+        // FIX: Prevent moving into a space that is already occupied by a block!
+        if (HasBlock(target))
+        {
+            return;
+        }
 
         if (CanStand(target))
         {
