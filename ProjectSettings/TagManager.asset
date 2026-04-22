@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 3
   tags:
   - Victory
+  - Basic
+  - Crack
+  - Spike
   layers:
   - Default
   - TransparentFX
