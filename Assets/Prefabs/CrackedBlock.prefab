@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2746897980037027286}
   - component: {fileID: 3739321544716430297}
   - component: {fileID: 4940325618945721435}
+  - component: {fileID: 2441195411008829982}
   m_Layer: 6
   m_Name: CrackedBlock
   m_TagString: Cracked
@@ -112,3 +113,16 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2441195411008829982
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8379342801991394883}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 181ee2255a69ea7429d33785da28d2c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CrackedBlock
+  crackMat2: {fileID: 2100000, guid: 007b0d5588ff1d043b1c7d8472502a87, type: 2}
