@@ -397,6 +397,12 @@ public class PlayerController : MonoBehaviour
 
             if (hits.Length > 0)
             {
+                // NEW: If any block in the row is Immovable, the whole push fails.
+                if (hits[0].CompareTag("Immovable"))
+                {
+                    return;
+                }
+
                 blocksToMove.Add(hits[0].transform);
             }
 
@@ -418,6 +424,19 @@ public class PlayerController : MonoBehaviour
     // =========================
     void PullBlock(Vector3Int blockPos, Vector3Int dir)
     {
+        // NEW: Check if the specific block we are trying to pull is Immovable
+        Collider[] targetHits = Physics.OverlapBox(
+            blockPos,
+            Vector3.one * 0.4f,
+            Quaternion.identity,
+            LayerMask.GetMask("Block")
+        );
+
+        if (targetHits.Length > 0 && targetHits[0].CompareTag("Immovable"))
+        {
+            return; // Abort the pull completely
+        }
+
         Vector3Int behind = gridPosition - currentFacing;
 
         if (!HasBlock(behind))

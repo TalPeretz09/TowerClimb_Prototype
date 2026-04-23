@@ -6,8 +6,10 @@ TagManager:
   tags:
   - Victory
   - Basic
-  - Crack
   - Spike
+  - Immovable
+  - Undefined
+  - Cracked
   layers:
   - Default
   - TransparentFX
