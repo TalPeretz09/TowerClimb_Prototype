@@ -3,8 +3,11 @@ using System.Collections;
 
 public class CrackedBlock : MonoBehaviour
 {
+    [Header("Settings")]
+    public int stepsToBreak = 2; // NEW: Set to 1 for your new block, 2 for the old one
+
     [Header("Materials")]
-    public Material crackMat2;
+    public Material crackMat2; // You can leave this empty for Cracked1
 
     private int stepCount = 0;
     private bool isDestroying = false;
@@ -15,24 +18,23 @@ public class CrackedBlock : MonoBehaviour
         blockRenderer = GetComponent<Renderer>();
     }
 
-    // Called by the PlayerController when the player steps onto this block
     public void OnStepped()
     {
         if (isDestroying) return;
 
         stepCount++;
 
-        if (stepCount == 1)
+        // If we haven't reached the breaking point yet, apply the damaged material
+        if (stepCount < stepsToBreak)
         {
-            // First step: Change material
             if (blockRenderer != null && crackMat2 != null)
             {
                 blockRenderer.material = crackMat2;
             }
         }
-        else if (stepCount >= 2)
+        // If we hit the step limit, initiate destruction
+        else if (stepCount >= stepsToBreak)
         {
-            // Second step: Initiate destruction
             isDestroying = true;
             StartCoroutine(DestroyAfterDelay());
         }
@@ -40,7 +42,6 @@ public class CrackedBlock : MonoBehaviour
 
     IEnumerator DestroyAfterDelay()
     {
-        // Wait for 0.8 seconds as requested, then destroy the block
         yield return new WaitForSeconds(0.8f);
         Destroy(gameObject);
     }

@@ -152,7 +152,8 @@ public class PlayerController : MonoBehaviour
             // Step mechanics only trigger ONCE when arriving on the block
             if (hasMovedToNewBlock)
             {
-                if (hit.CompareTag("Cracked"))
+                // NEW: Check for either tag!
+                if (hit.CompareTag("Cracked1") || hit.CompareTag("Cracked2"))
                 {
                     CrackedBlock cracked = hit.GetComponent<CrackedBlock>();
                     if (cracked != null)

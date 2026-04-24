@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4940325618945721435}
   - component: {fileID: 2441195411008829982}
   m_Layer: 6
-  m_Name: CrackedBlock
+  m_Name: CrackedBlock1
   m_TagString: Cracked
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -68,7 +68,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 17e55704e3926364c8adda1cb2577394, type: 2}
+  - {fileID: 2100000, guid: 007b0d5588ff1d043b1c7d8472502a87, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -125,4 +125,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 181ee2255a69ea7429d33785da28d2c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrackedBlock
+  stepsToBreak: 1
   crackMat2: {fileID: 2100000, guid: 007b0d5588ff1d043b1c7d8472502a87, type: 2}
