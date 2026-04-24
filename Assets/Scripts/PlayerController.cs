@@ -69,8 +69,56 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        CheckGravity();
         HandleMovement();
         CheckFloorInteractions();
+    }
+
+    // =========================
+    // GRAVITY
+    // =========================
+    void CheckGravity()
+    {
+        // Hanging handles its own state, so ignore gravity checks if hanging
+        if (isHanging) return;
+
+        // If there is no block underneath us, we fall!
+        if (!CanStand(gridPosition))
+        {
+            Vector3Int searchPos = gridPosition;
+            bool foundFloor = false;
+
+            // Search downward to find the next available floor
+            for (int i = 0; i < 200; i++)
+            {
+                if (CanStand(searchPos))
+                {
+                    foundFloor = true;
+                    break; // Floor found, stop searching!
+                }
+                searchPos += Vector3Int.down;
+            }
+
+            if (foundFloor)
+            {
+                // Snap player directly to the block we found below them
+                gridPosition = searchPos;
+                transform.position = gridPosition;
+
+                // Reset the last standing position so step triggers (like new cracked blocks) fire correctly
+                lastStandingPos = new Vector3Int(9999, 9999, 9999);
+            }
+            else
+            {
+                // No floor found below - the player has fallen into the abyss!
+                if (GameManager.Instance != null)
+                {
+                    GameManager.Instance.LoseGame();
+                }
+
+                Destroy(gameObject);
+            }
+        }
     }
 
     // =========================
