@@ -126,8 +126,6 @@ public class PlayerController : MonoBehaviour
     // =========================
     void CheckFloorInteractions()
     {
-        // If the player is hanging, they aren't standing on anything. 
-        // We reset the tracker so climbing back up counts as a fresh "step".
         if (isHanging)
         {
             lastStandingPos = new Vector3Int(9999, 9999, 9999);
@@ -135,8 +133,6 @@ public class PlayerController : MonoBehaviour
         }
 
         Vector3Int feetPos = gridPosition + Vector3Int.down;
-
-        // This bool is only true on the exact frame the player arrives on a new coordinate
         bool hasMovedToNewBlock = (feetPos != lastStandingPos);
 
         Collider[] hits = Physics.OverlapBox(
@@ -148,7 +144,6 @@ public class PlayerController : MonoBehaviour
 
         foreach (Collider hit in hits)
         {
-            // Victory can trigger anytime we are touching it
             if (hit.CompareTag("Victory"))
             {
                 GameManager.Instance.WinGame();
@@ -165,10 +160,18 @@ public class PlayerController : MonoBehaviour
                         cracked.OnStepped();
                     }
                 }
+                else if (hit.CompareTag("Spike")) // NEW: Handle Spike Blocks
+                {
+                    SpikeBlock spike = hit.GetComponent<SpikeBlock>();
+                    if (spike != null)
+                    {
+                        // Pass 'this' (the PlayerController) to the block
+                        spike.OnStepped(this);
+                    }
+                }
             }
         }
 
-        // Update the tracker position so we don't trigger steps while standing still/rotating
         if (hasMovedToNewBlock)
         {
             lastStandingPos = feetPos;
@@ -240,9 +243,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // =========================
-    // HANGING MOVEMENT
-    // =========================
     // =========================
     // HANGING MOVEMENT
     // =========================
