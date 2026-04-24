@@ -308,3 +308,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpikeBlock
   spikeVisual: {fileID: 7119593592160157963}
+  indicatorRenderer: {fileID: 242861590762089029}
+  safeMaterial: {fileID: 2100000, guid: 0e486000290ebc84db2216e89b822e8b, type: 2}

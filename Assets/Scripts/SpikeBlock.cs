@@ -4,9 +4,13 @@ using System.Collections;
 public class SpikeBlock : MonoBehaviour
 {
     [Header("Visuals")]
-    public GameObject spikeVisual; // Drag your child spike GameObject here
+    public GameObject spikeVisual; // The spike that kills you
 
-    private bool isTriggered = false;
+    [Header("Post-Activation")]
+    public Renderer indicatorRenderer; // The child object that will turn green
+    public Material safeMaterial;      // Your green material
+
+    private bool hasTriggered = false;
 
     void Start()
     {
@@ -17,19 +21,19 @@ public class SpikeBlock : MonoBehaviour
         }
     }
 
-    // We pass the PlayerController so we can check the player's position later
     public void OnStepped(PlayerController player)
     {
-        if (isTriggered) return; // Prevent multiple overlapping triggers
+        // If the trap has EVER been triggered, ignore all future steps
+        if (hasTriggered) return;
 
-        isTriggered = true;
+        hasTriggered = true;
         StartCoroutine(ActivateSpike(player));
     }
 
     IEnumerator ActivateSpike(PlayerController player)
     {
         // Wait for the trap delay
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.65f);
 
         // Turn on the spike visual
         if (spikeVisual != null)
@@ -52,7 +56,7 @@ public class SpikeBlock : MonoBehaviour
             Destroy(player.gameObject);
         }
 
-        // OPTIONAL: Wait 1 second and retract the spike so the trap can be triggered again
+        // Wait 1 second before retracting the spike
         yield return new WaitForSeconds(1.0f);
 
         if (spikeVisual != null)
@@ -60,6 +64,13 @@ public class SpikeBlock : MonoBehaviour
             spikeVisual.SetActive(false);
         }
 
-        isTriggered = false; // Reset the trap
+        // Change the material of your new child gameobject to green
+        if (indicatorRenderer != null && safeMaterial != null)
+        {
+            indicatorRenderer.material = safeMaterial;
+        }
+
+        // Notice we deliberately DO NOT set hasTriggered to false down here anymore.
+        // This permanently locks the block in its "safe" state!
     }
 }
