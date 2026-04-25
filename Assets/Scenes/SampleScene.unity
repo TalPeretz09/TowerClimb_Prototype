@@ -1042,7 +1042,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
       propertyPath: m_Name
-      value: CrackedBlock1 (17)
+      value: CrackBlock1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2858,7 +2858,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
       propertyPath: m_Name
-      value: CrackedBlock1 (7)
+      value: CrackBlock1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2888,7 +2888,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &206807669
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3341,7 +3341,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
       propertyPath: m_Name
-      value: CrackedBlock1 (15)
+      value: CrackBlock1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3995,7 +3995,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
       propertyPath: m_Name
-      value: CrackedBlock1 (16)
+      value: CrackBlock1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4807,7 +4807,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
       propertyPath: m_Name
-      value: CrackedBlock1 (6)
+      value: CrackBlock1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -6661,7 +6661,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
       propertyPath: m_Name
-      value: CrackedBlock1
+      value: CrackBlock1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -8344,7 +8344,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
       propertyPath: m_Name
-      value: CrackedBlock1 (8)
+      value: CrackBlock1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -9088,7 +9088,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
       propertyPath: m_Name
-      value: CrackedBlock1 (11)
+      value: CrackBlock1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -13202,7 +13202,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
       propertyPath: m_Name
-      value: CrackedBlock1 (10)
+      value: CrackBlock1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -14943,7 +14943,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
       propertyPath: m_Name
-      value: CrackedBlock1 (2)
+      value: CrackBlock1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -15486,7 +15486,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
       propertyPath: m_Name
-      value: CrackedBlock1 (12)
+      value: CrackBlock1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -16111,7 +16111,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
       propertyPath: m_Name
-      value: CrackedBlock1 (13)
+      value: CrackBlock1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -18962,7 +18962,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
       propertyPath: m_Name
-      value: CrackedBlock1 (3)
+      value: CrackBlock1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -19860,7 +19860,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
       propertyPath: m_Name
-      value: CrackedBlock1 (9)
+      value: CrackBlock1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -21213,7 +21213,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
       propertyPath: m_Name
-      value: CrackedBlock1 (14)
+      value: CrackBlock1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -21477,6 +21477,68 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 4541395277731855260, guid: adc2c7348180ab14e8896ce813aa356f, type: 3}
   m_PrefabInstance: {fileID: 1580243262}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1586073729
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2069172197}
+    m_Modifications:
+    - target: {fileID: 4541395277731855260, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4541395277731855260, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4541395277731855260, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4541395277731855260, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4541395277731855260, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4541395277731855260, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4541395277731855260, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4541395277731855260, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4541395277731855260, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4541395277731855260, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
+      propertyPath: m_Name
+      value: CrackBlock1 (1)
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
+--- !u!4 &1586073730 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4541395277731855260, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
+  m_PrefabInstance: {fileID: 1586073729}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1586325428
 GameObject:
@@ -24269,7 +24331,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
       propertyPath: m_Name
-      value: CrackedBlock1 (18)
+      value: CrackBlock1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -24955,7 +25017,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
       propertyPath: m_Name
-      value: CrackedBlock1 (4)
+      value: CrackBlock1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -27574,7 +27636,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
       propertyPath: m_Name
-      value: CrackedBlock1 (1)
+      value: CrackBlock1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -28765,6 +28827,7 @@ Transform:
   - {fileID: 1285412562}
   - {fileID: 40626155}
   - {fileID: 480843889}
+  - {fileID: 1586073730}
   - {fileID: 1999584482}
   - {fileID: 1127092367}
   - {fileID: 1420753165}
@@ -29232,7 +29295,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8379342801991394883, guid: 9b8686d2570fe0d40a2ac8bef08140f6, type: 3}
       propertyPath: m_Name
-      value: CrackedBlock1 (5)
+      value: CrackBlock1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

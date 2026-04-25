@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 2441195411008829982}
   m_Layer: 6
   m_Name: CrackedBlock1
-  m_TagString: Cracked
+  m_TagString: Cracked1
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
