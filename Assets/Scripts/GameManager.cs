@@ -102,31 +102,48 @@ public class GameManager : MonoBehaviour
         timerText.gameObject.SetActive(false);
         trophyUIImage.gameObject.SetActive(false);
         winPanel.SetActive(true);
-        
-
 
         UpdateTimerDisplay(gameTimer, finalTimeText);
 
-        // ==========================================
-        // NEW: ASSIGN THE FINAL TROPHY ON THE WIN SCREEN
-        // ==========================================
+        // Figure out which trophy they earned as a number
+        int earnedTrophyValue = 1; // Default to Bronze (1)
+
         if (finalTrophyImage != null)
         {
             if (gameTimer <= goldTimeLimit)
             {
                 finalTrophyImage.sprite = goldSprite;
+                earnedTrophyValue = 3; // Gold (3)
             }
             else if (gameTimer <= silverTimeLimit)
             {
                 finalTrophyImage.sprite = silverSprite;
+                earnedTrophyValue = 2; // Silver (2)
             }
             else
             {
                 finalTrophyImage.sprite = bronzeSprite;
+                // Remains Bronze (1)
             }
         }
 
         SelectUIObject(winRestartButton);
+
+        // ==========================================
+        // NEW: SAVE THE HIGHEST TROPHY TO PLAYERPREFS
+        // ==========================================
+        // Get the exact name of the current scene (e.g., "Tower1")
+        string currentLevelName = SceneManager.GetActiveScene().name;
+
+        // Look up the previously saved trophy for this specific level (defaults to 0 if they haven't played)
+        int savedTrophyValue = PlayerPrefs.GetInt(currentLevelName + "_Trophy", 0);
+
+        // If the trophy they just got is better than their saved one, save the new one!
+        if (earnedTrophyValue > savedTrophyValue)
+        {
+            PlayerPrefs.SetInt(currentLevelName + "_Trophy", earnedTrophyValue);
+            PlayerPrefs.Save(); // Forces Unity to write it to disk immediately
+        }
     }
 
     public void LoseGame()

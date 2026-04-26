@@ -265,7 +265,7 @@ GameObject:
   - component: {fileID: 143137444}
   - component: {fileID: 143137443}
   m_Layer: 5
-  m_Name: TrophyEmptyIMG
+  m_Name: TrophyEmptyIMG3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1247,7 +1247,7 @@ GameObject:
   - component: {fileID: 1044525071}
   - component: {fileID: 1044525070}
   m_Layer: 5
-  m_Name: TrophyEmptyIMG
+  m_Name: TrophyEmptyIMG1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1461,7 +1461,7 @@ GameObject:
   - component: {fileID: 1170948635}
   - component: {fileID: 1170948634}
   m_Layer: 5
-  m_Name: TrophyEmptyIMG
+  m_Name: TrophyEmptyIMG2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1554,6 +1554,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuManager
   firstSelectedButton: {fileID: 1544358377}
+  tower1TrophyImage: {fileID: 1044525070}
+  tower2TrophyImage: {fileID: 1170948634}
+  tower3TrophyImage: {fileID: 143137443}
+  emptyTrophySprite: {fileID: 21300000, guid: 14336675305ffa54783167e71d7a81b8, type: 3}
+  bronzeMenuSprite: {fileID: 21300000, guid: fbe76ffc29fb731419abc6abf3c162b1, type: 3}
+  silverMenuSprite: {fileID: 21300000, guid: 5c3997b8e67582e4bac953d33f180982, type: 3}
+  goldMenuSprite: {fileID: 21300000, guid: 61562627ed8d9ea4aa1f6a0953968caa, type: 3}
 --- !u!4 &1523733069
 Transform:
   m_ObjectHideFlags: 0
