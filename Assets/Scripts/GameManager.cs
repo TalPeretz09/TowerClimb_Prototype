@@ -2,7 +2,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
 using System.Collections;
-using UnityEngine.EventSystems; // NEW: Required to talk to the UI EventSystem
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class GameManager : MonoBehaviour
     public GameObject winPanel;
     public GameObject losePanel;
 
-    [Header("UI First Selected Buttons")] // NEW: Slots for your buttons
+    [Header("UI First Selected Buttons")]
     public GameObject startButton;
     public GameObject winRestartButton;
     public GameObject loseRestartButton;
@@ -22,6 +23,15 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI countdownText;
     public TextMeshProUGUI timerText;
     public TextMeshProUGUI finalTimeText;
+
+    [Header("Trophy System")]
+    public Image trophyUIImage; // The HUD shrinking trophy
+    public Image finalTrophyImage; // NEW: The final trophy shown on the Win Panel
+    public Sprite goldSprite;
+    public Sprite silverSprite;
+    public Sprite bronzeSprite;
+    public float goldTimeLimit = 30f;
+    public float silverTimeLimit = 60f;
 
     [Header("Game State")]
     public bool isPlaying = false;
@@ -41,7 +51,6 @@ public class GameManager : MonoBehaviour
         countdownText.gameObject.SetActive(false);
         timerText.gameObject.SetActive(false);
 
-        // NEW: Tell the controller to focus on the Start Button immediately
         SelectUIObject(startButton);
     }
 
@@ -51,16 +60,14 @@ public class GameManager : MonoBehaviour
         {
             gameTimer += Time.deltaTime;
             UpdateTimerDisplay(gameTimer, timerText);
+            UpdateTrophyDisplay();
         }
     }
 
     public void StartGameSequence()
     {
         startPanel.SetActive(false);
-
-        // NEW: Clear the UI selection so the player can't accidentally press buttons while playing
         EventSystem.current.SetSelectedGameObject(null);
-
         StartCoroutine(CountdownRoutine());
     }
 
@@ -93,11 +100,32 @@ public class GameManager : MonoBehaviour
 
         isPlaying = false;
         timerText.gameObject.SetActive(false);
+        trophyUIImage.gameObject.SetActive(false);
         winPanel.SetActive(true);
+        
+
 
         UpdateTimerDisplay(gameTimer, finalTimeText);
 
-        // NEW: Tell the controller to focus on the Restart button
+        // ==========================================
+        // NEW: ASSIGN THE FINAL TROPHY ON THE WIN SCREEN
+        // ==========================================
+        if (finalTrophyImage != null)
+        {
+            if (gameTimer <= goldTimeLimit)
+            {
+                finalTrophyImage.sprite = goldSprite;
+            }
+            else if (gameTimer <= silverTimeLimit)
+            {
+                finalTrophyImage.sprite = silverSprite;
+            }
+            else
+            {
+                finalTrophyImage.sprite = bronzeSprite;
+            }
+        }
+
         SelectUIObject(winRestartButton);
     }
 
@@ -105,8 +133,6 @@ public class GameManager : MonoBehaviour
     {
         isPlaying = false;
         losePanel.SetActive(true);
-
-        // NEW: Tell the controller to focus on the Restart button
         SelectUIObject(loseRestartButton);
     }
 
@@ -128,12 +154,32 @@ public class GameManager : MonoBehaviour
         textElement.text = string.Format("{0:00}:{1:00}", minutes, seconds);
     }
 
-    // NEW: Helper function to safely hand control to a specific UI element
     private void SelectUIObject(GameObject uiObject)
     {
-        // Always clear the current selection first. This ensures the EventSystem 
-        // registers the change, even if it thinks it was already selecting something.
         EventSystem.current.SetSelectedGameObject(null);
         EventSystem.current.SetSelectedGameObject(uiObject);
+    }
+
+    private void UpdateTrophyDisplay()
+    {
+        if (trophyUIImage == null) return;
+
+        if (gameTimer <= goldTimeLimit)
+        {
+            trophyUIImage.sprite = goldSprite;
+            trophyUIImage.fillAmount = 1f - (gameTimer / goldTimeLimit);
+        }
+        else if (gameTimer <= silverTimeLimit)
+        {
+            trophyUIImage.sprite = silverSprite;
+            float silverDuration = silverTimeLimit - goldTimeLimit;
+            float timeInSilver = gameTimer - goldTimeLimit;
+            trophyUIImage.fillAmount = 1f - (timeInSilver / silverDuration);
+        }
+        else
+        {
+            trophyUIImage.sprite = bronzeSprite;
+            trophyUIImage.fillAmount = 1f;
+        }
     }
 }
