@@ -132,6 +132,8 @@ public class GameManager : MonoBehaviour
     public void LoseGame()
     {
         isPlaying = false;
+        timerText.gameObject.SetActive(false);
+        trophyUIImage.gameObject.SetActive(false);
         losePanel.SetActive(true);
         SelectUIObject(loseRestartButton);
     }
