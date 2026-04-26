@@ -12200,8 +12200,8 @@ MonoBehaviour:
   goldSprite: {fileID: 21300000, guid: f4fb0987bfa8cfd4684fb31376da2178, type: 3}
   silverSprite: {fileID: 21300000, guid: 2d615bd9df2024843b455cb92251d66d, type: 3}
   bronzeSprite: {fileID: 21300000, guid: dfc4938cd04288c41acd4b7af7a0226d, type: 3}
-  goldTimeLimit: 30
-  silverTimeLimit: 60
+  goldTimeLimit: 75
+  silverTimeLimit: 95
   isPlaying: 0
 --- !u!4 &1547859668
 Transform:
