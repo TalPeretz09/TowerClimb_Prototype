@@ -62,4 +62,17 @@ public class MainMenuManager : MonoBehaviour
                 break;
         }
     }
+
+    // Wipes all save data and refreshes the menu
+    public void ResetSaveData()
+    {
+        // 1. Delete all saved PlayerPrefs
+        PlayerPrefs.DeleteAll();
+
+        // 2. Force Unity to save that wipe to the hard drive instantly
+        PlayerPrefs.Save();
+
+        // 3. Reload the Main Menu scene so the trophies visually disappear
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
 }
