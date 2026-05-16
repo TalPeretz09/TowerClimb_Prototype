@@ -29,6 +29,10 @@ public class PlayerController : MonoBehaviour
     public float cameraSpeed = 120f;
     public float cameraFollowSpeed = 5f; // New: Controls how snappy or floaty the camera tracks upward
 
+    //Visuals
+    [Header("Visuals")]
+    public GameObject armsObject;
+
     void Awake()
     {
         input = new PlayerInputActions();
@@ -39,8 +43,18 @@ public class PlayerController : MonoBehaviour
         input.Player.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
         input.Player.Look.canceled += ctx => lookInput = Vector2.zero;
 
-        input.Player.Interact.performed += ctx => interactHeld = true;
-        input.Player.Interact.canceled += ctx => interactHeld = false;
+        // NEW: Expand these inputs to also toggle the arms object
+        input.Player.Interact.performed += ctx =>
+        {
+            interactHeld = true;
+            if (armsObject != null) armsObject.SetActive(true); // Turn arms ON
+        };
+
+        input.Player.Interact.canceled += ctx =>
+        {
+            interactHeld = false;
+            if (armsObject != null) armsObject.SetActive(false); // Turn arms OFF
+        };
     }
 
     void OnEnable() => input.Enable();
@@ -58,6 +72,9 @@ public class PlayerController : MonoBehaviour
             startPos.y = transform.position.y;
             cameraPivot.position = startPos;
         }
+
+        // NEW: Ensure arms always start hidden
+        if (armsObject != null) armsObject.SetActive(false);
     }
 
     void Update()
