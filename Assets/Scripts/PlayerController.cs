@@ -258,10 +258,39 @@ public class PlayerController : MonoBehaviour
     {
         if (input.magnitude < 0.5f) return Vector3Int.zero;
 
-        if (Mathf.Abs(input.x) > Mathf.Abs(input.y))
-            return input.x > 0 ? Vector3Int.right : Vector3Int.left;
+        // Fallback: If you ever test without a camera pivot, use the old absolute controls
+        if (cameraPivot == null)
+        {
+            if (Mathf.Abs(input.x) > Mathf.Abs(input.y))
+                return input.x > 0 ? Vector3Int.right : Vector3Int.left;
+            else
+                return input.y > 0 ? Vector3Int.forward : Vector3Int.back;
+        }
+
+        // 1. Get the camera's directional vectors and flatten them so we don't move into the floor/sky
+        Vector3 camForward = cameraPivot.forward;
+        Vector3 camRight = cameraPivot.right;
+
+        camForward.y = 0;
+        camRight.y = 0;
+
+        camForward.Normalize();
+        camRight.Normalize();
+
+        // 2. Translate the 2D joystick/keyboard input into the camera's 3D orientation
+        Vector3 desiredWorldDir = (camRight * input.x) + (camForward * input.y);
+
+        // 3. Snap that resulting 3D direction to the nearest absolute Grid Axis (X or Z)
+        if (Mathf.Abs(desiredWorldDir.x) > Mathf.Abs(desiredWorldDir.z))
+        {
+            // Moving mostly along the X axis
+            return desiredWorldDir.x > 0 ? Vector3Int.right : Vector3Int.left;
+        }
         else
-            return input.y > 0 ? Vector3Int.forward : Vector3Int.back;
+        {
+            // Moving mostly along the Z axis
+            return desiredWorldDir.z > 0 ? Vector3Int.forward : Vector3Int.back;
+        }
     }
 
     // =========================
