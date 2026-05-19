@@ -475,7 +475,13 @@ public class PlayerController : MonoBehaviour
     {
         Vector3Int front = gridPosition + dir;
         Vector3Int aboveFront = front + Vector3Int.up;
-        return HasBlock(front) && !HasBlock(aboveFront);
+
+        // NEW: Calculate the space directly above the player's head
+        Vector3Int abovePlayer = gridPosition + Vector3Int.up;
+
+        // Return true ONLY if there is a block in front, the space on top of that block is empty, 
+        // AND the space directly above the player is also empty.
+        return HasBlock(front) && !HasBlock(aboveFront) && !HasBlock(abovePlayer);
     }
 
     void TryClimb(Vector3Int dir)
