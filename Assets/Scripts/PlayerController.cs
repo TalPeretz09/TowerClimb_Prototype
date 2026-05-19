@@ -27,11 +27,14 @@ public class PlayerController : MonoBehaviour
     [Header("Camera")]
     public Transform cameraPivot;
     public float cameraSpeed = 120f;
-    public float cameraFollowSpeed = 5f; // New: Controls how snappy or floaty the camera tracks upward
+    public float cameraFollowSpeed = 5f;
 
-    //Visuals
+    // VISUALS
     [Header("Visuals")]
     public GameObject armsObject;
+
+    private Vector3 originalArmsPos;
+    private Quaternion originalArmsRot;
 
     void Awake()
     {
@@ -43,17 +46,16 @@ public class PlayerController : MonoBehaviour
         input.Player.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
         input.Player.Look.canceled += ctx => lookInput = Vector2.zero;
 
-        // NEW: Expand these inputs to also toggle the arms object
         input.Player.Interact.performed += ctx =>
         {
             interactHeld = true;
-            if (armsObject != null) armsObject.SetActive(true); // Turn arms ON
+            UpdateArmsState();
         };
 
         input.Player.Interact.canceled += ctx =>
         {
             interactHeld = false;
-            if (armsObject != null) armsObject.SetActive(false); // Turn arms OFF
+            UpdateArmsState();
         };
     }
 
@@ -65,7 +67,6 @@ public class PlayerController : MonoBehaviour
         gridPosition = Vector3Int.RoundToInt(transform.position);
         transform.position = gridPosition;
 
-        // Snap the camera to the player's starting height immediately
         if (cameraPivot != null)
         {
             Vector3 startPos = cameraPivot.position;
@@ -73,17 +74,34 @@ public class PlayerController : MonoBehaviour
             cameraPivot.position = startPos;
         }
 
-        // NEW: Ensure arms always start hidden
-        if (armsObject != null) armsObject.SetActive(false);
+        if (armsObject != null)
+        {
+            originalArmsPos = armsObject.transform.localPosition;
+            originalArmsRot = armsObject.transform.localRotation;
+            armsObject.SetActive(false);
+        }
     }
 
     void Update()
     {
-        // NEW: Only allow movement if the game is actually playing
+        // --- COUNTDOWN / PAUSE STATE ---
         if (GameManager.Instance != null && !GameManager.Instance.isPlaying)
         {
-            moveHoldTime = 0f; // Reset move hold so they don't buffer inputs
+            moveHoldTime = 0f;
+
+            // NEW: Safety check to keep arms completely disabled during countdown
+            if (armsObject != null && armsObject.activeSelf)
+            {
+                armsObject.SetActive(false);
+            }
             return;
+        }
+
+        // --- GAME PLAYING STATE ---
+        // NEW: Automatically syncs the arms if the player was holding the button when the countdown ended
+        if (armsObject != null && !isHanging && armsObject.activeSelf != interactHeld)
+        {
+            UpdateArmsState();
         }
 
         CheckGravity();
@@ -92,47 +110,69 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
+    // ARMS STATE MANAGER
+    // =========================
+    void UpdateArmsState()
+    {
+        if (armsObject == null) return;
+
+        // NEW: Prevent arms from being enabled manually if the game hasn't started
+        if (GameManager.Instance != null && !GameManager.Instance.isPlaying)
+        {
+            armsObject.SetActive(false);
+            armsObject.transform.localPosition = originalArmsPos;
+            armsObject.transform.localRotation = originalArmsRot;
+            return;
+        }
+
+        if (isHanging)
+        {
+            armsObject.SetActive(true);
+            armsObject.transform.localPosition = new Vector3(originalArmsPos.x, 0.5f, originalArmsPos.z);
+            armsObject.transform.localRotation = Quaternion.Euler(-60f, originalArmsRot.eulerAngles.y, originalArmsRot.eulerAngles.z);
+        }
+        else
+        {
+            armsObject.SetActive(interactHeld);
+            armsObject.transform.localPosition = originalArmsPos;
+            armsObject.transform.localRotation = originalArmsRot;
+        }
+    }
+
+    // =========================
     // GRAVITY
     // =========================
     void CheckGravity()
     {
-        // Hanging handles its own state, so ignore gravity checks if hanging
         if (isHanging) return;
 
-        // If there is no block underneath us, we fall!
         if (!CanStand(gridPosition))
         {
             Vector3Int searchPos = gridPosition;
             bool foundFloor = false;
 
-            // Search downward to find the next available floor
             for (int i = 0; i < 200; i++)
             {
                 if (CanStand(searchPos))
                 {
                     foundFloor = true;
-                    break; // Floor found, stop searching!
+                    break;
                 }
                 searchPos += Vector3Int.down;
             }
 
             if (foundFloor)
             {
-                // Snap player directly to the block we found below them
                 gridPosition = searchPos;
                 transform.position = gridPosition;
-
-                // Reset the last standing position so step triggers (like new cracked blocks) fire correctly
                 lastStandingPos = new Vector3Int(9999, 9999, 9999);
             }
             else
             {
-                // No floor found below - the player has fallen into the abyss!
                 if (GameManager.Instance != null)
                 {
                     GameManager.Instance.LoseGame();
                 }
-
                 Destroy(gameObject);
             }
         }
@@ -166,10 +206,8 @@ public class PlayerController : MonoBehaviour
                 GameManager.Instance.WinGame();
             }
 
-            // Step mechanics only trigger ONCE when arriving on the block
             if (hasMovedToNewBlock)
             {
-                // NEW: Check for either tag!
                 if (hit.CompareTag("Cracked1") || hit.CompareTag("Cracked2"))
                 {
                     CrackedBlock cracked = hit.GetComponent<CrackedBlock>();
@@ -178,12 +216,11 @@ public class PlayerController : MonoBehaviour
                         cracked.OnStepped();
                     }
                 }
-                else if (hit.CompareTag("Spike")) // NEW: Handle Spike Blocks
+                else if (hit.CompareTag("Spike"))
                 {
                     SpikeBlock spike = hit.GetComponent<SpikeBlock>();
                     if (spike != null)
                     {
-                        // Pass 'this' (the PlayerController) to the block
                         spike.OnStepped(this);
                     }
                 }
@@ -229,7 +266,6 @@ public class PlayerController : MonoBehaviour
 
         moveHoldTime += Time.deltaTime;
 
-        // --- HANGING STATE ---
         if (isHanging)
         {
             if (moveHoldTime >= holdThreshold)
@@ -240,11 +276,9 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // --- NORMAL STATE ---
         Vector3Int front = gridPosition + currentFacing;
         bool isGrabbing = interactHeld && HasBlock(front);
 
-        // TAP -> rotate only
         if (moveHoldTime < holdThreshold)
         {
             if (!isGrabbing && currentFacing != dir)
@@ -253,7 +287,6 @@ public class PlayerController : MonoBehaviour
                 RotatePlayer(dir);
             }
         }
-        // HOLD -> move / push / pull
         else
         {
             TryMoveOrPush(dir);
@@ -266,7 +299,7 @@ public class PlayerController : MonoBehaviour
     // =========================
     void TryHangMovement(Vector3Int dir)
     {
-        // 1. CLIMB UP (Release Hang)
+        // 1. CLIMB UP
         if (dir == currentFacing)
         {
             Vector3Int standPos = gridPosition + currentFacing + Vector3Int.up;
@@ -274,51 +307,48 @@ public class PlayerController : MonoBehaviour
             if (!HasBlock(standPos))
             {
                 isHanging = false;
+                UpdateArmsState();
+
                 gridPosition = standPos;
                 transform.position = gridPosition;
                 RotatePlayer(currentFacing);
             }
         }
-        // 2. DROP DOWN (Release Hang)
+        // 2. DROP DOWN
         else if (dir == -currentFacing)
         {
             isHanging = false;
+            UpdateArmsState();
 
             Vector3Int searchPos = gridPosition;
             bool foundFloor = false;
 
-            // Search downward. The limit of 200 prevents infinite loops in case of a bug.
             for (int i = 0; i < 200; i++)
             {
                 if (CanStand(searchPos))
                 {
                     foundFloor = true;
-                    break; // Floor found, stop searching!
+                    break;
                 }
                 searchPos += Vector3Int.down;
             }
 
             if (foundFloor)
             {
-                // Snap player directly to the block we found below them
                 gridPosition = searchPos;
                 transform.position = gridPosition;
                 RotatePlayer(currentFacing);
             }
             else
             {
-                // No floor found below - the player has fallen into the abyss!
                 if (GameManager.Instance != null)
                 {
-                    // Call the method to activate your new lose panel
                     GameManager.Instance.LoseGame();
                 }
-
-                // Destroy the player character
                 Destroy(gameObject);
             }
         }
-        // 3. SHIMMY (Left / Right)
+        // 3. SHIMMY
         else
         {
             float dot = Vector3.Dot((Vector3)dir, (Vector3)currentFacing);
@@ -329,13 +359,11 @@ public class PlayerController : MonoBehaviour
                 Vector3Int targetHeadPos = targetPos + Vector3Int.up;
                 Vector3Int targetGrabBlock = targetPos + currentFacing;
 
-                // OPTION 1: Straight Shimmy
                 if (!HasBlock(targetPos) && !HasBlock(targetHeadPos) && HasBlock(targetGrabBlock))
                 {
                     gridPosition = targetPos;
                     transform.position = gridPosition;
                 }
-                // OPTION 2: Outside Corner Swing
                 else if (!HasBlock(targetPos) && !HasBlock(targetHeadPos) && !HasBlock(targetGrabBlock))
                 {
                     Vector3Int diagonalPos = targetPos + currentFacing;
@@ -349,7 +377,6 @@ public class PlayerController : MonoBehaviour
                         RotatePlayer(currentFacing);
                     }
                 }
-                // OPTION 3: Inside Corner Grab
                 else if (HasBlock(targetPos))
                 {
                     currentFacing = dir;
@@ -370,13 +397,11 @@ public class PlayerController : MonoBehaviour
         {
             float dot = Vector3.Dot((Vector3)dir, (Vector3)currentFacing);
 
-            // PUSH (same direction)
             if (dot > 0)
             {
                 PushBlock(front, currentFacing);
                 return;
             }
-            // PULL (opposite direction)
             else if (dot < 0)
             {
                 PullBlock(front, -currentFacing);
@@ -384,21 +409,18 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        // CLIMB UP
         if (dir == currentFacing && CanClimb(dir))
         {
             TryClimb(dir);
             return;
         }
 
-        // CLIMB DOWN
         if (dir == currentFacing && CanClimbDown(dir))
         {
             TryClimbDown(dir);
             return;
         }
 
-        // MOVE
         TryMove(dir);
     }
 
@@ -409,11 +431,7 @@ public class PlayerController : MonoBehaviour
     {
         Vector3Int target = gridPosition + dir;
 
-        // FIX: Prevent moving into a space that is already occupied by a block!
-        if (HasBlock(target))
-        {
-            return;
-        }
+        if (HasBlock(target)) return;
 
         if (CanStand(target))
         {
@@ -422,12 +440,13 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            // ENTER HANG STATE: Walk off a 2-block drop ledge
             Vector3Int targetDown = target + Vector3Int.down;
 
             if (!HasBlock(target) && !HasBlock(targetDown))
             {
                 isHanging = true;
+                UpdateArmsState();
+
                 gridPosition = targetDown;
                 currentFacing = -dir;
                 transform.position = gridPosition;
@@ -443,7 +462,6 @@ public class PlayerController : MonoBehaviour
     {
         Vector3Int front = gridPosition + dir;
         Vector3Int aboveFront = front + Vector3Int.up;
-
         return HasBlock(front) && !HasBlock(aboveFront);
     }
 
@@ -451,7 +469,6 @@ public class PlayerController : MonoBehaviour
     {
         Vector3Int front = gridPosition + dir;
         Vector3Int aboveFront = front + Vector3Int.up;
-
         gridPosition = aboveFront;
         transform.position = gridPosition;
     }
@@ -463,14 +480,12 @@ public class PlayerController : MonoBehaviour
     {
         Vector3Int front = gridPosition + dir;
         Vector3Int frontDown = front + Vector3Int.down;
-
         return !HasBlock(front) && !HasBlock(frontDown) && CanStand(frontDown);
     }
 
     void TryClimbDown(Vector3Int dir)
     {
         Vector3Int frontDown = gridPosition + dir + Vector3Int.down;
-
         gridPosition = frontDown;
         transform.position = gridPosition;
     }
@@ -494,15 +509,9 @@ public class PlayerController : MonoBehaviour
 
             if (hits.Length > 0)
             {
-                // NEW: If any block in the row is Immovable, the whole push fails.
-                if (hits[0].CompareTag("Immovable"))
-                {
-                    return;
-                }
-
+                if (hits[0].CompareTag("Immovable")) return;
                 blocksToMove.Add(hits[0].transform);
             }
-
             checkPos += dir;
         }
 
@@ -521,7 +530,6 @@ public class PlayerController : MonoBehaviour
     // =========================
     void PullBlock(Vector3Int blockPos, Vector3Int dir)
     {
-        // NEW: Check if the specific block we are trying to pull is Immovable
         Collider[] targetHits = Physics.OverlapBox(
             blockPos,
             Vector3.one * 0.4f,
@@ -529,10 +537,7 @@ public class PlayerController : MonoBehaviour
             LayerMask.GetMask("Block")
         );
 
-        if (targetHits.Length > 0 && targetHits[0].CompareTag("Immovable"))
-        {
-            return; // Abort the pull completely
-        }
+        if (targetHits.Length > 0 && targetHits[0].CompareTag("Immovable")) return;
 
         Vector3Int behind = gridPosition - currentFacing;
 
@@ -547,8 +552,9 @@ public class PlayerController : MonoBehaviour
             }
             else
             {
-                // ENTER HANG STATE: Pull block and step back into empty air
                 isHanging = true;
+                UpdateArmsState();
+
                 gridPosition = behind + Vector3Int.down;
                 transform.position = gridPosition;
                 RotatePlayer(currentFacing);
@@ -618,14 +624,15 @@ public class PlayerController : MonoBehaviour
     {
         if (cameraPivot == null) return;
 
-        // 1. Pivot Rotation (Horizontal)
-        float rotation = lookInput.x * cameraSpeed * Time.deltaTime;
-        cameraPivot.Rotate(Vector3.up, rotation);
+        // NEW: Only allow the camera to rotate horizontally if the game is actually active
+        if (GameManager.Instance != null && GameManager.Instance.isPlaying)
+        {
+            float rotation = lookInput.x * cameraSpeed * Time.deltaTime;
+            cameraPivot.Rotate(Vector3.up, rotation);
+        }
 
-        // 2. Smooth Omnidirectional Tracking
-        // NEW: Now targets the player's exact X, Y, and Z position
+        // Smooth Omnidirectional Tracking remains active so the camera behaves normally on spawn/snap
         Vector3 targetPos = transform.position;
-
         cameraPivot.position = Vector3.Lerp(cameraPivot.position, targetPos, cameraFollowSpeed * Time.deltaTime);
     }
 }
