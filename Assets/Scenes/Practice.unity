@@ -3324,6 +3324,10 @@ PrefabInstance:
       propertyPath: cameraPivot
       value: 
       objectReference: {fileID: 1345074719}
+    - target: {fileID: 926208637486608962, guid: c328e22d2609b24488f7a6bcab3529b1, type: 3}
+      propertyPath: dustParticlePrefab
+      value: 
+      objectReference: {fileID: 1980336651924797007, guid: 1c4958e2c4241664ebf5ba0206b709f6, type: 3}
     - target: {fileID: 5202610604280537260, guid: c328e22d2609b24488f7a6bcab3529b1, type: 3}
       propertyPath: m_Name
       value: Player

@@ -32,6 +32,7 @@ public class PlayerController : MonoBehaviour
     // VISUALS
     [Header("Visuals")]
     public GameObject armsObject;
+    public GameObject dustParticlePrefab;
 
     private Vector3 originalArmsPos;
     private Quaternion originalArmsRot;
@@ -136,6 +137,18 @@ public class PlayerController : MonoBehaviour
             armsObject.SetActive(interactHeld);
             armsObject.transform.localPosition = originalArmsPos;
             armsObject.transform.localRotation = originalArmsRot;
+        }
+    }
+
+    // =========================
+    // EFFECTS
+    // =========================
+    void SpawnDust(Vector3 position)
+    {
+        if (dustParticlePrefab != null)
+        {
+            // Spawn the dust at the block's position, shifted slightly down towards the floor
+            Instantiate(dustParticlePrefab, position + (Vector3.down * 0.4f), Quaternion.Euler(-90, 0, 0));
         }
     }
 
@@ -519,6 +532,8 @@ public class PlayerController : MonoBehaviour
         {
             for (int i = blocksToMove.Count - 1; i >= 0; i--)
             {
+                // NEW: Spawn dust at the OLD position before moving the block
+                SpawnDust(blocksToMove[i].position);
                 blocksToMove[i].position += (Vector3)dir;
             }
             Physics.SyncTransforms();
@@ -543,6 +558,9 @@ public class PlayerController : MonoBehaviour
 
         if (!HasBlock(behind))
         {
+            // NEW: Spawn dust at the block's OLD position before pulling it
+            SpawnDust(blockPos);
+
             MoveBlock(blockPos, gridPosition);
 
             if (CanStand(behind))
