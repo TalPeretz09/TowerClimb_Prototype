@@ -6,11 +6,9 @@ using UnityEngine.UI;
 public class MainMenuManager : MonoBehaviour
 {
     [Header("Navigation")]
-    public GameObject firstSelectedButton; // (This is currently your Yes button)
+    public GameObject firstSelectedButton; // (Your "Yes" button on the tutorial panel)
     public GameObject firstTimePanel;
-
-    // NEW: A slot to hold the main menu button we return to when closing the panel
-    public GameObject mainMenuReturnButton;
+    public GameObject mainMenuReturnButton; // (Your primary main menu button, e.g., Tower 1)
 
     [Header("Level Trophy UI Images")]
     public Image tower1TrophyImage;
@@ -25,12 +23,57 @@ public class MainMenuManager : MonoBehaviour
 
     void Start()
     {
-        EventSystem.current.SetSelectedGameObject(null);
-        EventSystem.current.SetSelectedGameObject(firstSelectedButton);
-
+        // 1. Load trophies right away
         LoadAndDisplayTrophy("Tower1", tower1TrophyImage);
         LoadAndDisplayTrophy("Tower2", tower2TrophyImage);
         LoadAndDisplayTrophy("Tower3", tower3TrophyImage);
+
+        // 2. Check if the player has already answered the tutorial prompt before
+        if (PlayerPrefs.GetInt("HasSeenTutorialPrompt", 0) == 1)
+        {
+            // They've seen it! Force hide the panel immediately
+            firstTimePanel.SetActive(false);
+
+            // Directly focus on the main menu button instead
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(mainMenuReturnButton);
+        }
+        else
+        {
+            // Brand new player! Make sure the panel is open
+            firstTimePanel.SetActive(true);
+
+            // Focus on the panel's "Yes" button
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(firstSelectedButton);
+        }
+    }
+
+    // Call this if they click "Yes" to play the tutorial
+    public void PlayTutorial(string tutorialSceneName)
+    {
+        MarkTutorialPromptAsSeen();
+        SceneManager.LoadScene(tutorialSceneName);
+    }
+
+    // Call this if they click "No" to skip the tutorial (or attach it to your No button)
+    public void HideFirstTimePanel()
+    {
+        firstTimePanel.SetActive(false);
+        MarkTutorialPromptAsSeen();
+
+        if (mainMenuReturnButton != null)
+        {
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(mainMenuReturnButton);
+        }
+    }
+
+    // Helper method to keep things clean and DRY (Don't Repeat Yourself)
+    private void MarkTutorialPromptAsSeen()
+    {
+        PlayerPrefs.SetInt("HasSeenTutorialPrompt", 1);
+        PlayerPrefs.Save();
     }
 
     public void LoadLevel(string levelName)
@@ -59,18 +102,5 @@ public class MainMenuManager : MonoBehaviour
         PlayerPrefs.DeleteAll();
         PlayerPrefs.Save();
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-    }
-
-    // UPDATED: Now safely returns focus to the main menu layout
-    public void HideFirstTimePanel()
-    {
-        firstTimePanel.SetActive(false);
-
-        // NEW: Force the EventSystem to look back at the main menu layout
-        if (mainMenuReturnButton != null)
-        {
-            EventSystem.current.SetSelectedGameObject(null);
-            EventSystem.current.SetSelectedGameObject(mainMenuReturnButton);
-        }
     }
 }
