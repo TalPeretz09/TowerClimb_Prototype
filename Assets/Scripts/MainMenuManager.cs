@@ -5,10 +5,21 @@ using UnityEngine.UI;
 
 public class MainMenuManager : MonoBehaviour
 {
-    [Header("Navigation")]
-    public GameObject firstSelectedButton; // (Your "Yes" button on the tutorial panel)
-    public GameObject firstTimePanel;
-    public GameObject mainMenuReturnButton; // (Your primary main menu button, e.g., Tower 1)
+    [Header("Menu Groups (Canvases/Panels)")]
+    public GameObject mainMenuGroup;
+    public GameObject playGamesGroup;
+    public GameObject trainingGroup;
+    public GameObject toolsGroup;
+    public GameObject techniquesGroup;
+    public GameObject firstTimeGroup;
+
+    [Header("Default Selected Buttons (For Controller/Keyboard)")]
+    public GameObject mainMenuFirstBTN;     // e.g., PlayGameBTN
+    public GameObject playGamesFirstBTN;    // e.g., Level1BTN
+    public GameObject trainingFirstBTN;     // e.g., PracticeStageBTN
+    public GameObject toolsFirstBTN;        // e.g., UnlockAllBTN
+    public GameObject techniquesFirstBTN;   // e.g., ReturnBTN (if empty)
+    public GameObject firstTimeFirstBTN;    // Your "Yes" button
 
     [Header("Level Trophy UI Images")]
     public Image tower1TrophyImage;
@@ -28,57 +39,132 @@ public class MainMenuManager : MonoBehaviour
         LoadAndDisplayTrophy("Tower2", tower2TrophyImage);
         LoadAndDisplayTrophy("Tower3", tower3TrophyImage);
 
-        // 2. Check if the player has already answered the tutorial prompt before
+        // 2. Setup the initial menu state
         if (PlayerPrefs.GetInt("HasSeenTutorialPrompt", 0) == 1)
         {
-            // They've seen it! Force hide the panel immediately
-            firstTimePanel.SetActive(false);
-
-            // Directly focus on the main menu button instead
-            EventSystem.current.SetSelectedGameObject(null);
-            EventSystem.current.SetSelectedGameObject(mainMenuReturnButton);
+            // Player has been here before. Skip the prompt and open Main Menu.
+            firstTimeGroup.SetActive(false);
+            OpenMainMenu();
         }
         else
         {
-            // Brand new player! Make sure the panel is open
-            firstTimePanel.SetActive(true);
-
-            // Focus on the panel's "Yes" button
-            EventSystem.current.SetSelectedGameObject(null);
-            EventSystem.current.SetSelectedGameObject(firstSelectedButton);
+            // Brand new player! Show the prompt.
+            HideAllMenus(); // Keep the background clean
+            firstTimeGroup.SetActive(true);
+            SetControllerFocus(firstTimeFirstBTN);
         }
     }
 
-    // Call this if they click "Yes" to play the tutorial
+    // ==========================================
+    // MODULAR MENU NAVIGATION
+    // ==========================================
+
+    // Use these public methods to hook up your UI Button OnClick() events in the Inspector
+
+    public void OpenMainMenu()
+    {
+        SwitchToMenu(mainMenuGroup, mainMenuFirstBTN);
+    }
+
+    public void OpenPlayGames()
+    {
+        SwitchToMenu(playGamesGroup, playGamesFirstBTN);
+    }
+
+    public void OpenTraining()
+    {
+        SwitchToMenu(trainingGroup, trainingFirstBTN);
+    }
+
+    public void OpenTools()
+    {
+        SwitchToMenu(toolsGroup, toolsFirstBTN);
+    }
+
+    public void OpenTechniques()
+    {
+        SwitchToMenu(techniquesGroup, techniquesFirstBTN);
+    }
+
+    // ==========================================
+    // CORE SYSTEM HELPERS
+    // ==========================================
+
+    // Automatically shuts off all screens, turns on the target screen, and snaps controller focus.
+    private void SwitchToMenu(GameObject menuToOpen, GameObject buttonToFocus)
+    {
+        HideAllMenus();
+
+        if (menuToOpen != null)
+        {
+            menuToOpen.SetActive(true);
+        }
+
+        SetControllerFocus(buttonToFocus);
+    }
+
+    // Ensures we never have two menus overlapping by accident
+    private void HideAllMenus()
+    {
+        if (mainMenuGroup) mainMenuGroup.SetActive(false);
+        if (playGamesGroup) playGamesGroup.SetActive(false);
+        if (trainingGroup) trainingGroup.SetActive(false);
+        if (toolsGroup) toolsGroup.SetActive(false);
+        if (techniquesGroup) techniquesGroup.SetActive(false);
+    }
+
+    private void SetControllerFocus(GameObject targetButton)
+    {
+        if (targetButton != null)
+        {
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(targetButton);
+        }
+    }
+
+    // ==========================================
+    // FIRST TIME PROMPT LOGIC
+    // ==========================================
+
     public void PlayTutorial(string tutorialSceneName)
     {
         MarkTutorialPromptAsSeen();
         SceneManager.LoadScene(tutorialSceneName);
     }
 
-    // Call this if they click "No" to skip the tutorial (or attach it to your No button)
     public void HideFirstTimePanel()
     {
-        firstTimePanel.SetActive(false);
+        firstTimeGroup.SetActive(false);
         MarkTutorialPromptAsSeen();
-
-        if (mainMenuReturnButton != null)
-        {
-            EventSystem.current.SetSelectedGameObject(null);
-            EventSystem.current.SetSelectedGameObject(mainMenuReturnButton);
-        }
+        OpenMainMenu(); // Cleanly transitions to the main layout
     }
 
-    // Helper method to keep things clean and DRY (Don't Repeat Yourself)
     private void MarkTutorialPromptAsSeen()
     {
         PlayerPrefs.SetInt("HasSeenTutorialPrompt", 1);
         PlayerPrefs.Save();
     }
 
-    public void LoadLevel(string levelName)
+    // ==========================================
+    // GAMEPLAY & TOOL LOGIC
+    // ==========================================
+
+    public void LoadScene(string levelName)
     {
         SceneManager.LoadScene(levelName);
+    }
+
+    public void ResetSaveData()
+    {
+        PlayerPrefs.DeleteAll();
+        PlayerPrefs.Save();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    // Placeholder for your Unlock All functionality
+    public void UnlockAll()
+    {
+        Debug.Log("Unlock All clicked! Add your unlock logic here.");
     }
 
     private void LoadAndDisplayTrophy(string levelName, Image trophyImageToUpdate)
@@ -95,12 +181,5 @@ public class MainMenuManager : MonoBehaviour
             case 0:
             default: trophyImageToUpdate.sprite = emptyTrophySprite; break;
         }
-    }
-
-    public void ResetSaveData()
-    {
-        PlayerPrefs.DeleteAll();
-        PlayerPrefs.Save();
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
