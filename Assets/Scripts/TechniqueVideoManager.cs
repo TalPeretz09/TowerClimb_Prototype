@@ -6,75 +6,100 @@ public class TechniqueVideoManager : MonoBehaviour
 {
     [Header("Video Components")]
     public VideoPlayer videoPlayer;
+    public RawImage videoDisplay;
 
     [Header("Play/Pause UI")]
-    public Image playPauseIcon; // The child image component on your button
+    public Image playPauseIcon;
     public Sprite playSprite;
     public Sprite pauseSprite;
 
-    // Optional: Hide the raw image if no video is loaded so it's not a black square
-    public RawImage videoDisplay;
+    private void Awake()
+    {
+        // Tell Unity to run our "OnVideoFinished" function the exact moment any video ends
+        if (videoPlayer != null)
+        {
+            videoPlayer.loopPointReached += OnVideoFinished;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        // Clean up the event listener when the script is destroyed to avoid memory leaks
+        if (videoPlayer != null)
+        {
+            videoPlayer.loopPointReached -= OnVideoFinished;
+        }
+    }
 
     void OnEnable()
     {
-        // Whenever this menu opens, make sure everything is reset and clean
         ResetVideoPlayer();
     }
 
     // ==========================================
-    // 1. LOAD & PLAY NEW VIDEO
+    // 1. LOAD VIDEO (WITHOUT AUTOPLAY)
     // ==========================================
 
-    // Hook this up to each of your 7 Technique Buttons!
+    // Kept the method name the same so you don't have to re-link your buttons!
     public void LoadAndPlayVideo(VideoClip newClip)
     {
         if (newClip == null) return;
 
-        // Turn on the screen if you had it hidden
         if (videoDisplay != null) videoDisplay.enabled = true;
 
-        // Load the new clip and force it to play
+        // Assign the clip
         videoPlayer.clip = newClip;
-        videoPlayer.Play();
 
-        // Update the UI icon to show the Pause symbol
-        playPauseIcon.sprite = pauseSprite;
+        // Pause immediately so it cues up the first frame but doesn't play
+        videoPlayer.Pause();
+        videoPlayer.frame = 0;
+
+        // Keep the icon as the Play triangle since the video is waiting
+        playPauseIcon.sprite = playSprite;
     }
 
     // ==========================================
     // 2. PLAY / PAUSE TOGGLE
     // ==========================================
 
-    // Hook this up to your Play/Pause Button
     public void TogglePlayPause()
     {
-        // Don't do anything if they haven't selected a technique yet
         if (videoPlayer.clip == null) return;
 
         if (videoPlayer.isPlaying)
         {
             videoPlayer.Pause();
-            playPauseIcon.sprite = playSprite; // Swap to Triangle
+            playPauseIcon.sprite = playSprite;
         }
         else
         {
             videoPlayer.Play();
-            playPauseIcon.sprite = pauseSprite; // Swap to Bars
+            playPauseIcon.sprite = pauseSprite;
         }
     }
 
     // ==========================================
-    // 3. CLEANUP
+    // 3. AUTOMATIC RESET ON FINISH
     // ==========================================
 
-    // Hook this up to your Return Button so the video stops when leaving the menu
+    // This runs automatically via the event we hooked up in Awake()
+    private void OnVideoFinished(VideoPlayer source)
+    {
+        source.Pause();             // Stop playback
+        source.frame = 0;           // Rewind completely back to the start
+        playPauseIcon.sprite = playSprite; // Swap icon back to the Play triangle
+    }
+
+    // ==========================================
+    // 4. CLEANUP ON LEAVING MENU
+    // ==========================================
+
     public void ResetVideoPlayer()
     {
         videoPlayer.Stop();
         videoPlayer.clip = null;
         playPauseIcon.sprite = playSprite;
 
-        // Hide the screen so it looks clean before a technique is picked
         if (videoDisplay != null) videoDisplay.enabled = false;
     }
 }
