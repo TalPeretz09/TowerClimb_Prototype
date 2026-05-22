@@ -3877,7 +3877,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &682011092
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3920,10 +3920,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TechniqueVideoManager
   videoPlayer: {fileID: 1023644343}
+  videoDisplay: {fileID: 1592201060}
   playPauseIcon: {fileID: 2029452398}
   playSprite: {fileID: 21300000, guid: ba8c2abf1bb2cb44b80fc60cd30df25a, type: 3}
   pauseSprite: {fileID: 21300000, guid: 1982a260f5a4cfc4884f53f5fe7d28af, type: 3}
-  videoDisplay: {fileID: 1592201060}
 --- !u!1 &777566250
 GameObject:
   m_ObjectHideFlags: 0
