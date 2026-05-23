@@ -1832,7 +1832,7 @@ MonoBehaviour:
         m_MethodName: LoadAndPlayVideo
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 32900000, guid: 69ac709bde75f1d4eb961d7ac9bdbaf2, type: 3}
+          m_ObjectArgument: {fileID: 32900000, guid: 7c26e1e6ff8528442b98eda82beae3a2, type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Video.VideoClip, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -2093,7 +2093,7 @@ MonoBehaviour:
         m_MethodName: LoadAndPlayVideo
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 32900000, guid: e51e79643c4ec7940b58ff5c7adcfcc7, type: 3}
+          m_ObjectArgument: {fileID: 32900000, guid: 851aef2af0622234a97ee9c53682d9e4, type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Video.VideoClip, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -3770,7 +3770,7 @@ MonoBehaviour:
   m_Navigation:
     m_Mode: 4
     m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
+    m_SelectOnUp: {fileID: 1362277723}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
@@ -4410,7 +4410,7 @@ MonoBehaviour:
         m_MethodName: LoadAndPlayVideo
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 32900000, guid: 0b585916de98d504ba6cb107de8341fd, type: 3}
+          m_ObjectArgument: {fileID: 32900000, guid: 5fb2230d28c15aa408d4a9b256af9bfa, type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Video.VideoClip, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -6966,7 +6966,7 @@ MonoBehaviour:
     m_Mode: 4
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
+    m_SelectOnDown: {fileID: 664042713}
     m_SelectOnLeft: {fileID: 1542821250}
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
@@ -7719,7 +7719,7 @@ MonoBehaviour:
         m_MethodName: LoadAndPlayVideo
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 32900000, guid: 1b45d16e9f1239f40bc39383f219b8cc, type: 3}
+          m_ObjectArgument: {fileID: 32900000, guid: fe6fbdb83b289f74592f7ca5f2b6632d, type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Video.VideoClip, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -9019,7 +9019,7 @@ MonoBehaviour:
         m_MethodName: LoadAndPlayVideo
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 32900000, guid: 668de3082239bbb4ba0147d535c1f746, type: 3}
+          m_ObjectArgument: {fileID: 32900000, guid: e6b5a209cb8eff444b177e16415a0e8c, type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Video.VideoClip, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -9504,8 +9504,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1820, y: 980}
+  m_AnchoredPosition: {x: 1.500061, y: 0}
+  m_SizeDelta: {x: 1833, y: 990}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1942465112
 MonoBehaviour:
@@ -9706,7 +9706,7 @@ MonoBehaviour:
         m_MethodName: LoadAndPlayVideo
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 32900000, guid: ce7b98b5e7fac8e46b846b26ed9b609f, type: 3}
+          m_ObjectArgument: {fileID: 32900000, guid: 603be3ffd7709f8449d27e9383269dfc, type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Video.VideoClip, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -10097,7 +10097,7 @@ MonoBehaviour:
         m_MethodName: LoadAndPlayVideo
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 32900000, guid: 254d5c76ceae7064da13fdcd60253ace, type: 3}
+          m_ObjectArgument: {fileID: 32900000, guid: 13b793dfeb91d874d94d3243fbccf09f, type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Video.VideoClip, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
