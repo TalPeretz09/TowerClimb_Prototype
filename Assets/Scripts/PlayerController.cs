@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -217,8 +218,17 @@ public class PlayerController : MonoBehaviour
             if (hit.CompareTag("Victory"))
             {
                 GameManager.Instance.WinGame();
+                if (SceneManager.GetActiveScene().name == "Tower1")
+                {
+                    TechniqueUnlockManager.UnlockTechnique("Tech4");
+                    TechniqueUnlockManager.UnlockTechnique("Tech5");
+                }
+                else if (SceneManager.GetActiveScene().name == "Tower2")
+                {
+                    TechniqueUnlockManager.UnlockTechnique("Tech6");
+                    TechniqueUnlockManager.UnlockTechnique("Tech7");
+                }
             }
-
             if (hasMovedToNewBlock)
             {
                 if (hit.CompareTag("Cracked1") || hit.CompareTag("Cracked2"))

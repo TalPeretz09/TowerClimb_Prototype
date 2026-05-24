@@ -2238,7 +2238,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 405443665}
   m_OnClick:
     m_PersistentCalls:
@@ -4662,7 +4662,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &682011092
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5370,7 +5370,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 868576676}
   m_OnClick:
     m_PersistentCalls:
@@ -8092,6 +8092,102 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1346376933}
   m_CullTransparentMesh: 1
+--- !u!1 &1352739100
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1352739102}
+  - component: {fileID: 1352739101}
+  m_Layer: 0
+  m_Name: TechniqueUnlockManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1352739101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1352739100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8175433bb37ad747945ded1178191b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TechniqueUnlockManager
+  trainingBtnNewTag: {fileID: 75571697}
+  techniquesBtnNewTag: {fileID: 611677824}
+  techniques:
+  - techniqueId: Tech1
+    displayName: Pyramid
+    unlockedByDefault: 1
+    techniqueButton: {fileID: 1542821250}
+    newTag: {fileID: 2108478154}
+    lockIcon: {fileID: 297619665}
+    techniqueText: {fileID: 189337487}
+  - techniqueId: Tech2
+    displayName: Slider
+    unlockedByDefault: 1
+    techniqueButton: {fileID: 410988724}
+    newTag: {fileID: 411760101}
+    lockIcon: {fileID: 2060402250}
+    techniqueText: {fileID: 1761510461}
+  - techniqueId: Tech3
+    displayName: Spider
+    unlockedByDefault: 1
+    techniqueButton: {fileID: 2006249237}
+    newTag: {fileID: 561708427}
+    lockIcon: {fileID: 1974504205}
+    techniqueText: {fileID: 1369981371}
+  - techniqueId: Tech4
+    displayName: Suspending
+    unlockedByDefault: 0
+    techniqueButton: {fileID: 1773353056}
+    newTag: {fileID: 2097186812}
+    lockIcon: {fileID: 1372244355}
+    techniqueText: {fileID: 628576348}
+  - techniqueId: Tech5
+    displayName: Pullback
+    unlockedByDefault: 0
+    techniqueButton: {fileID: 2133534259}
+    newTag: {fileID: 863660294}
+    lockIcon: {fileID: 777566250}
+    techniqueText: {fileID: 1738270472}
+  - techniqueId: Tech6
+    displayName: Tornado
+    unlockedByDefault: 0
+    techniqueButton: {fileID: 405443664}
+    newTag: {fileID: 328329653}
+    lockIcon: {fileID: 1663933370}
+    techniqueText: {fileID: 364509171}
+  - techniqueId: Tech7
+    displayName: Bridge
+    unlockedByDefault: 0
+    techniqueButton: {fileID: 868576675}
+    newTag: {fileID: 117875496}
+    lockIcon: {fileID: 2091589281}
+    techniqueText: {fileID: 922298101}
+--- !u!4 &1352739102
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1352739100}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1042.4862, y: 537.8672, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1362277721
 GameObject:
   m_ObjectHideFlags: 0
@@ -9149,7 +9245,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1541756261
 RectTransform:
   m_ObjectHideFlags: 0
@@ -10902,7 +10998,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 1773353057}
   m_OnClick:
     m_PersistentCalls:
@@ -12022,7 +12118,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2039733792
 RectTransform:
   m_ObjectHideFlags: 0
@@ -12337,7 +12433,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 2133534260}
   m_OnClick:
     m_PersistentCalls:
@@ -12402,3 +12498,4 @@ SceneRoots:
   - {fileID: 427297665}
   - {fileID: 1680907331}
   - {fileID: 1523733069}
+  - {fileID: 1352739102}
