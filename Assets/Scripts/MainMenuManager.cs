@@ -206,7 +206,7 @@ public class MainMenuManager : MonoBehaviour
     // GAMEPLAY & TOOL LOGIC
     // ==========================================
 
-    public void LoadScene(string levelName)
+    public void LoadLevel(string levelName)
     {
         if (IsLevelUnlocked(levelName))
         {
@@ -216,6 +216,11 @@ public class MainMenuManager : MonoBehaviour
         {
             Debug.LogWarning("Attempted to load locked level: " + levelName);
         }
+    }
+
+    public void LoadScene(string sceneName)
+    {
+        SceneManager.LoadScene(sceneName);
     }
 
     private bool IsLevelUnlocked(string levelName)

@@ -1059,7 +1059,7 @@ GameObject:
   m_Component:
   - component: {fileID: 154396667}
   m_Layer: 0
-  m_Name: 'Tower[3-2]'
+  m_Name: Tower3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11944,9 +11944,11 @@ MonoBehaviour:
   startPanel: {fileID: 1359215617}
   winPanel: {fileID: 1426799688}
   losePanel: {fileID: 1043351387}
+  techniqueUnlockPanel: {fileID: 0}
   startButton: {fileID: 1377465075}
   winRestartButton: {fileID: 1295595182}
   loseRestartButton: {fileID: 1953756265}
+  techniqueYesButton: {fileID: 0}
   countdownText: {fileID: 1253883150}
   timerText: {fileID: 1294230052}
   finalTimeText: {fileID: 510667150}
