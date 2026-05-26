@@ -5,15 +5,14 @@ using UnityEngine.UI;
 
 public class MainMenuManager : MonoBehaviour
 {
-    // A custom data structure to pair each level button with its child components
     [System.Serializable]
     public class LevelButtonData
     {
-        public string levelName;          // Must match the exact Unity Scene name (e.g., "Tower1")
-        public Button buttonComponent;    // The Button component itself to turn clicking on/off
-        public GameObject levelText;      // Child object: The level number/name text
-        public GameObject trophyObject;   // Child object: The trophy Image object
-        public GameObject lockImage;      // Child object: The lock icon Image object
+        public string levelName;
+        public Button buttonComponent;
+        public GameObject levelText;
+        public GameObject trophyObject;
+        public GameObject lockImage;
     }
 
     [Header("Menu Groups (Canvases/Panels)")]
@@ -24,17 +23,20 @@ public class MainMenuManager : MonoBehaviour
     public GameObject techniquesGroup;
     public GameObject firstTimeGroup;
 
-    [Header("Default Selected Buttons (For Controller/Keyboard)")]
-    public GameObject mainMenuFirstBTN;     // e.g., PlayGameBTN
-    public GameObject playGamesFirstBTN;    // e.g., Level1BTN
-    public GameObject trainingFirstBTN;     // e.g., PracticeStageBTN
-    public GameObject toolsFirstBTN;        // e.g., UnlockAllBTN
-    public GameObject techniquesFirstBTN;   // e.g., ReturnBTN (if empty)
-    public GameObject firstTimeFirstBTN;    // Your "Yes" button
+    [Header("Default Selected Buttons")]
+    public GameObject mainMenuFirstBTN;
+    public GameObject playGamesFirstBTN;
+    public GameObject trainingFirstBTN;
+    public GameObject toolsFirstBTN;
+    public GameObject techniquesFirstBTN;
+    public GameObject firstTimeFirstBTN;
 
     [Header("Level Progression System")]
-    [Tooltip("Add your level buttons here in consecutive order (Level 1, Level 2, Level 3...)")]
     public LevelButtonData[] levels;
+
+    [Header("Technique System Link")]
+    [Tooltip("Drag the GameObject with your TechniqueUnlockManager here")]
+    public TechniqueUnlockManager techniqueUnlockManager; // NEW: Reference to your existing manager
 
     [Header("Menu Trophy Sprites")]
     public Sprite emptyTrophySprite;
@@ -44,10 +46,8 @@ public class MainMenuManager : MonoBehaviour
 
     void Start()
     {
-        // 1. Process progression and update child objects dynamically
         UpdateLevelProgression();
 
-        // 2. Setup the initial menu state or handle incoming redirects
         if (PlayerPrefs.GetInt("AutoOpenTechniques", 0) == 1)
         {
             PlayerPrefs.SetInt("AutoOpenTechniques", 0);
@@ -74,28 +74,27 @@ public class MainMenuManager : MonoBehaviour
     // ==========================================
     private void UpdateLevelProgression()
     {
+        // NEW: Check if the player has clicked "Unlock All"
+        bool overrideUnlockAll = PlayerPrefs.GetInt("UnlockAllOverride", 0) == 1;
+
         for (int i = 0; i < levels.Length; i++)
         {
             if (levels[i] == null) continue;
 
             bool isUnlocked = false;
 
-            if (i == 0)
+            // If it's Level 1 OR the player used the Unlock All tool, it opens up
+            if (i == 0 || overrideUnlockAll)
             {
-                // The very first level button in the list is always unlocked by default
                 isUnlocked = true;
             }
             else
             {
-                // Look at the PREVIOUS level in the array
                 string previousLevelName = levels[i - 1].levelName;
                 int previousLevelTrophy = PlayerPrefs.GetInt(previousLevelName + "_Trophy", 0);
-
-                // If previous level has a trophy score higher than 0, it means it was beaten!
                 isUnlocked = (previousLevelTrophy > 0);
             }
 
-            // Apply the interactivity and child visibility states
             if (levels[i].buttonComponent != null) levels[i].buttonComponent.interactable = isUnlocked;
             if (levels[i].levelText != null) levels[i].levelText.SetActive(isUnlocked);
             if (levels[i].lockImage != null) levels[i].lockImage.SetActive(!isUnlocked);
@@ -104,7 +103,6 @@ public class MainMenuManager : MonoBehaviour
             {
                 levels[i].trophyObject.SetActive(isUnlocked);
 
-                // If the level is unlocked, safely load whatever trophy sprite belongs here
                 if (isUnlocked)
                 {
                     Image trophyImageComponent = levels[i].trophyObject.GetComponent<Image>();
@@ -144,6 +142,12 @@ public class MainMenuManager : MonoBehaviour
     public void OpenTechniques()
     {
         SwitchToMenu(techniquesGroup, techniquesFirstBTN);
+
+        // Optionally: Refresh techniques UI when opening the menu
+        if (techniqueUnlockManager != null)
+        {
+            techniqueUnlockManager.RefreshUI();
+        }
     }
 
     // ==========================================
@@ -153,12 +157,7 @@ public class MainMenuManager : MonoBehaviour
     private void SwitchToMenu(GameObject menuToOpen, GameObject buttonToFocus)
     {
         HideAllMenus();
-
-        if (menuToOpen != null)
-        {
-            menuToOpen.SetActive(true);
-        }
-
+        if (menuToOpen != null) menuToOpen.SetActive(true);
         SetControllerFocus(buttonToFocus);
     }
 
@@ -209,8 +208,6 @@ public class MainMenuManager : MonoBehaviour
 
     public void LoadScene(string levelName)
     {
-        // Only allow loading the scene if the level is actually unlocked
-        // (Prevents bypassing via keyboard shortcuts/hacks if button is visually disabled)
         if (IsLevelUnlocked(levelName))
         {
             SceneManager.LoadScene(levelName);
@@ -223,12 +220,14 @@ public class MainMenuManager : MonoBehaviour
 
     private bool IsLevelUnlocked(string levelName)
     {
-        // Find the index of this level in our system
+        // Check the master override first
+        if (PlayerPrefs.GetInt("UnlockAllOverride", 0) == 1) return true;
+
         for (int i = 0; i < levels.Length; i++)
         {
             if (levels[i].levelName == levelName)
             {
-                if (i == 0) return true; // Level 1 is always open
+                if (i == 0) return true;
 
                 string previousLevelName = levels[i - 1].levelName;
                 return PlayerPrefs.GetInt(previousLevelName + "_Trophy", 0) > 0;
@@ -239,19 +238,32 @@ public class MainMenuManager : MonoBehaviour
 
     public void ResetSaveData()
     {
-        PlayerPrefs.DeleteAll();
+        PlayerPrefs.DeleteAll(); // This also clears the new UnlockAllOverride
         PlayerPrefs.Save();
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     public void UnlockAll()
     {
-        // Give every level context a mock trophy entry so they all open up
-        for (int i = 0; i < levels.Length; i++)
+        // 1. Activate the master override for level buttons (keeps trophy scores at 0)
+        PlayerPrefs.SetInt("UnlockAllOverride", 1);
+
+        // 2. Unlock all techniques using your existing static method
+        if (techniqueUnlockManager != null)
         {
-            PlayerPrefs.SetInt(levels[i].levelName + "_Trophy", 1);
+            foreach (var tech in techniqueUnlockManager.techniques)
+            {
+                TechniqueUnlockManager.UnlockTechnique(tech.techniqueId);
+            }
         }
+        else
+        {
+            Debug.LogWarning("TechniqueUnlockManager is not assigned in MainMenuManager!");
+        }
+
         PlayerPrefs.Save();
+
+        // Reload scene to visually update all locks, tags, and buttons
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
@@ -267,7 +279,7 @@ public class MainMenuManager : MonoBehaviour
             case 2: trophyImageToUpdate.sprite = silverMenuSprite; break;
             case 1: trophyImageToUpdate.sprite = bronzeMenuSprite; break;
             case 0:
-            default: trophyImageToUpdate.sprite = emptyTrophySprite; break;
+            default: trophyImageToUpdate.sprite = emptyTrophySprite; break; // This now correctly fires for Unlock All!
         }
     }
 }

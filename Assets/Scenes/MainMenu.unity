@@ -9359,9 +9359,23 @@ MonoBehaviour:
   toolsFirstBTN: {fileID: 1230990174}
   techniquesFirstBTN: {fileID: 1542821248}
   firstTimeFirstBTN: {fileID: 193197751}
-  tower1TrophyImage: {fileID: 1044525070}
-  tower2TrophyImage: {fileID: 1170948634}
-  tower3TrophyImage: {fileID: 143137443}
+  levels:
+  - levelName: Tower1
+    buttonComponent: {fileID: 1544358379}
+    levelText: {fileID: 554069598}
+    trophyObject: {fileID: 1044525068}
+    lockImage: {fileID: 0}
+  - levelName: Tower2
+    buttonComponent: {fileID: 34197001}
+    levelText: {fileID: 224269586}
+    trophyObject: {fileID: 1170948632}
+    lockImage: {fileID: 1490351536}
+  - levelName: Tower3
+    buttonComponent: {fileID: 1895403973}
+    levelText: {fileID: 1145659964}
+    trophyObject: {fileID: 143137441}
+    lockImage: {fileID: 323632542}
+  techniqueUnlockManager: {fileID: 1352739101}
   emptyTrophySprite: {fileID: 21300000, guid: 14336675305ffa54783167e71d7a81b8, type: 3}
   bronzeMenuSprite: {fileID: 21300000, guid: fbe76ffc29fb731419abc6abf3c162b1, type: 3}
   silverMenuSprite: {fileID: 21300000, guid: 5c3997b8e67582e4bac953d33f180982, type: 3}
@@ -9396,7 +9410,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1541756261
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9609,7 +9623,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
   m_Navigation:
-    m_Mode: 4
+    m_Mode: -1
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 1425196876}
     m_SelectOnDown: {fileID: 34197001}
@@ -9838,7 +9852,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1546899767
 RectTransform:
   m_ObjectHideFlags: 0
@@ -12270,7 +12284,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2039733792
 RectTransform:
   m_ObjectHideFlags: 0
