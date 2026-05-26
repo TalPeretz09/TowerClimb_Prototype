@@ -13,11 +13,13 @@ public class GameManager : MonoBehaviour
     public GameObject startPanel;
     public GameObject winPanel;
     public GameObject losePanel;
+    public GameObject techniqueUnlockPanel; // NEW: The technique popup panel
 
     [Header("UI First Selected Buttons")]
     public GameObject startButton;
     public GameObject winRestartButton;
     public GameObject loseRestartButton;
+    public GameObject techniqueYesButton;   // NEW: Highlighted button for technique panel
 
     [Header("UI Text Elements")]
     public TextMeshProUGUI countdownText;
@@ -48,6 +50,7 @@ public class GameManager : MonoBehaviour
         if (startPanel != null) startPanel.SetActive(true);
         if (winPanel != null) winPanel.SetActive(false);
         if (losePanel != null) losePanel.SetActive(false);
+        if (techniqueUnlockPanel != null) techniqueUnlockPanel.SetActive(false); // Ensure panel starts closed
 
         // Null checks added here
         if (countdownText != null) countdownText.gameObject.SetActive(false);
@@ -114,8 +117,6 @@ public class GameManager : MonoBehaviour
         if (timerText != null) timerText.gameObject.SetActive(false);
         if (trophyUIImage != null) trophyUIImage.gameObject.SetActive(false);
 
-        if (winPanel != null) winPanel.SetActive(true);
-
         UpdateTimerDisplay(gameTimer, finalTimeText);
 
         // Figure out which trophy they earned as a number
@@ -140,23 +141,56 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        SelectUIObject(winRestartButton);
-
         // ==========================================
-        // SAVE THE HIGHEST TROPHY TO PLAYERPREFS
+        // CHECK FIRST TIME WIN & SAVE DATA
         // ==========================================
-        // Get the exact name of the current scene (e.g., "Tower1")
         string currentLevelName = SceneManager.GetActiveScene().name;
 
-        // Look up the previously saved trophy for this specific level (defaults to 0 if they haven't played)
+        // Look up the previously saved trophy (defaults to 0 if they haven't played/won yet)
         int savedTrophyValue = PlayerPrefs.GetInt(currentLevelName + "_Trophy", 0);
+        bool isFirstTimeWin = (savedTrophyValue == 0);
 
-        // If the trophy they just got is better than their saved one, save the new one!
+        // If the trophy they just got is better than their saved one, save it
         if (earnedTrophyValue > savedTrophyValue)
         {
             PlayerPrefs.SetInt(currentLevelName + "_Trophy", earnedTrophyValue);
-            PlayerPrefs.Save(); // Forces Unity to write it to disk immediately
+            PlayerPrefs.Save();
         }
+
+        // ==========================================
+        // PANEL ROUTING LOGIC
+        // ==========================================
+        if (isFirstTimeWin && techniqueUnlockPanel != null)
+        {
+            // First time completing! Route to the Technique screen instead of the win panel
+            techniqueUnlockPanel.SetActive(true);
+            SelectUIObject(techniqueYesButton);
+        }
+        else
+        {
+            // Regular win sequence
+            if (winPanel != null) winPanel.SetActive(true);
+            SelectUIObject(winRestartButton);
+        }
+    }
+
+    // ==========================================
+    // NEW: TECHNIQUE PANEL BUTTON INTERFACES
+    // ==========================================
+    public void OnTechniqueNoPressed()
+    {
+        if (techniqueUnlockPanel != null) techniqueUnlockPanel.SetActive(false);
+        if (winPanel != null) winPanel.SetActive(true);
+        SelectUIObject(winRestartButton);
+    }
+
+    public void OnTechniqueYesPressed()
+    {
+        // Drop a navigation flag so the main menu knows to skip straight to techniques
+        PlayerPrefs.SetInt("AutoOpenTechniques", 1);
+        PlayerPrefs.Save();
+
+        ReturnToMenu();
     }
 
     public void LoseGame()
@@ -183,7 +217,6 @@ public class GameManager : MonoBehaviour
 
     private void UpdateTimerDisplay(float time, TextMeshProUGUI textElement)
     {
-        // Safe exit if no UI text is assigned for the timer
         if (textElement == null) return;
 
         int minutes = Mathf.FloorToInt(time / 60F);
@@ -194,14 +227,14 @@ public class GameManager : MonoBehaviour
 
     private void SelectUIObject(GameObject uiObject)
     {
-        if (uiObject == null) return; // Added safety check here too
+        if (uiObject == null) return;
         EventSystem.current.SetSelectedGameObject(null);
         EventSystem.current.SetSelectedGameObject(uiObject);
     }
 
     private void UpdateTrophyDisplay()
     {
-        if (trophyUIImage == null) return; // This already had a great null check!
+        if (trophyUIImage == null) return;
 
         if (gameTimer <= goldTimeLimit)
         {

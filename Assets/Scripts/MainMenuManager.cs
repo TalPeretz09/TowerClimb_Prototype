@@ -39,18 +39,29 @@ public class MainMenuManager : MonoBehaviour
         LoadAndDisplayTrophy("Tower2", tower2TrophyImage);
         LoadAndDisplayTrophy("Tower3", tower3TrophyImage);
 
-        // 2. Setup the initial menu state
-        if (PlayerPrefs.GetInt("HasSeenTutorialPrompt", 0) == 1)
+        // 2. Setup the initial menu state or handle incoming redirects
+        if (PlayerPrefs.GetInt("AutoOpenTechniques", 0) == 1)
+        {
+            // Clear the shortcut flag so it doesn't loop next time they launch the game
+            PlayerPrefs.SetInt("AutoOpenTechniques", 0);
+            PlayerPrefs.Save();
+
+            if (firstTimeGroup != null) firstTimeGroup.SetActive(false);
+
+            // Open the techniques layout directly
+            OpenTechniques();
+        }
+        else if (PlayerPrefs.GetInt("HasSeenTutorialPrompt", 0) == 1)
         {
             // Player has been here before. Skip the prompt and open Main Menu.
-            firstTimeGroup.SetActive(false);
+            if (firstTimeGroup != null) firstTimeGroup.SetActive(false);
             OpenMainMenu();
         }
         else
         {
             // Brand new player! Show the prompt.
             HideAllMenus(); // Keep the background clean
-            firstTimeGroup.SetActive(true);
+            if (firstTimeGroup != null) firstTimeGroup.SetActive(true);
             SetControllerFocus(firstTimeFirstBTN);
         }
     }
@@ -58,8 +69,6 @@ public class MainMenuManager : MonoBehaviour
     // ==========================================
     // MODULAR MENU NAVIGATION
     // ==========================================
-
-    // Use these public methods to hook up your UI Button OnClick() events in the Inspector
 
     public void OpenMainMenu()
     {
@@ -90,7 +99,6 @@ public class MainMenuManager : MonoBehaviour
     // CORE SYSTEM HELPERS
     // ==========================================
 
-    // Automatically shuts off all screens, turns on the target screen, and snaps controller focus.
     private void SwitchToMenu(GameObject menuToOpen, GameObject buttonToFocus)
     {
         HideAllMenus();
@@ -103,7 +111,6 @@ public class MainMenuManager : MonoBehaviour
         SetControllerFocus(buttonToFocus);
     }
 
-    // Ensures we never have two menus overlapping by accident
     private void HideAllMenus()
     {
         if (mainMenuGroup) mainMenuGroup.SetActive(false);
@@ -134,9 +141,9 @@ public class MainMenuManager : MonoBehaviour
 
     public void HideFirstTimePanel()
     {
-        firstTimeGroup.SetActive(false);
+        if (firstTimeGroup != null) firstTimeGroup.SetActive(false);
         MarkTutorialPromptAsSeen();
-        OpenMainMenu(); // Cleanly transitions to the main layout
+        OpenMainMenu();
     }
 
     private void MarkTutorialPromptAsSeen()
@@ -161,7 +168,6 @@ public class MainMenuManager : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
-    // Placeholder for your Unlock All functionality
     public void UnlockAll()
     {
         Debug.Log("Unlock All clicked! Add your unlock logic here.");
