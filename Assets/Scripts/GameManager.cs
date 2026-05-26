@@ -45,11 +45,13 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        startPanel.SetActive(true);
-        winPanel.SetActive(false);
-        losePanel.SetActive(false);
-        countdownText.gameObject.SetActive(false);
-        timerText.gameObject.SetActive(false);
+        if (startPanel != null) startPanel.SetActive(true);
+        if (winPanel != null) winPanel.SetActive(false);
+        if (losePanel != null) losePanel.SetActive(false);
+
+        // Null checks added here
+        if (countdownText != null) countdownText.gameObject.SetActive(false);
+        if (timerText != null) timerText.gameObject.SetActive(false);
 
         SelectUIObject(startButton);
     }
@@ -66,30 +68,38 @@ public class GameManager : MonoBehaviour
 
     public void StartGameSequence()
     {
-        startPanel.SetActive(false);
+        if (startPanel != null) startPanel.SetActive(false);
         EventSystem.current.SetSelectedGameObject(null);
         StartCoroutine(CountdownRoutine());
     }
 
     IEnumerator CountdownRoutine()
     {
-        countdownText.gameObject.SetActive(true);
+        if (countdownText != null)
+        {
+            countdownText.gameObject.SetActive(true);
 
-        countdownText.text = "3";
-        yield return new WaitForSeconds(1f);
+            countdownText.text = "3";
+            yield return new WaitForSeconds(1f);
 
-        countdownText.text = "2";
-        yield return new WaitForSeconds(1f);
+            countdownText.text = "2";
+            yield return new WaitForSeconds(1f);
 
-        countdownText.text = "1";
-        yield return new WaitForSeconds(1f);
+            countdownText.text = "1";
+            yield return new WaitForSeconds(1f);
 
-        countdownText.text = "GO!";
-        yield return new WaitForSeconds(1f);
+            countdownText.text = "GO!";
+            yield return new WaitForSeconds(1f);
 
-        countdownText.gameObject.SetActive(false);
+            countdownText.gameObject.SetActive(false);
+        }
+        else
+        {
+            // If there's no countdown text, just wait a brief moment before starting
+            yield return new WaitForSeconds(1f);
+        }
 
-        timerText.gameObject.SetActive(true);
+        if (timerText != null) timerText.gameObject.SetActive(true);
         gameTimer = 0f;
         isPlaying = true;
     }
@@ -99,9 +109,12 @@ public class GameManager : MonoBehaviour
         if (!isPlaying) return;
 
         isPlaying = false;
-        timerText.gameObject.SetActive(false);
-        trophyUIImage.gameObject.SetActive(false);
-        winPanel.SetActive(true);
+
+        // Null checks added here
+        if (timerText != null) timerText.gameObject.SetActive(false);
+        if (trophyUIImage != null) trophyUIImage.gameObject.SetActive(false);
+
+        if (winPanel != null) winPanel.SetActive(true);
 
         UpdateTimerDisplay(gameTimer, finalTimeText);
 
@@ -130,7 +143,7 @@ public class GameManager : MonoBehaviour
         SelectUIObject(winRestartButton);
 
         // ==========================================
-        // NEW: SAVE THE HIGHEST TROPHY TO PLAYERPREFS
+        // SAVE THE HIGHEST TROPHY TO PLAYERPREFS
         // ==========================================
         // Get the exact name of the current scene (e.g., "Tower1")
         string currentLevelName = SceneManager.GetActiveScene().name;
@@ -149,9 +162,12 @@ public class GameManager : MonoBehaviour
     public void LoseGame()
     {
         isPlaying = false;
-        timerText.gameObject.SetActive(false);
-        trophyUIImage.gameObject.SetActive(false);
-        losePanel.SetActive(true);
+
+        // Null checks added here
+        if (timerText != null) timerText.gameObject.SetActive(false);
+        if (trophyUIImage != null) trophyUIImage.gameObject.SetActive(false);
+
+        if (losePanel != null) losePanel.SetActive(true);
         SelectUIObject(loseRestartButton);
     }
 
@@ -167,6 +183,9 @@ public class GameManager : MonoBehaviour
 
     private void UpdateTimerDisplay(float time, TextMeshProUGUI textElement)
     {
+        // Safe exit if no UI text is assigned for the timer
+        if (textElement == null) return;
+
         int minutes = Mathf.FloorToInt(time / 60F);
         int seconds = Mathf.FloorToInt(time % 60F);
 
@@ -175,13 +194,14 @@ public class GameManager : MonoBehaviour
 
     private void SelectUIObject(GameObject uiObject)
     {
+        if (uiObject == null) return; // Added safety check here too
         EventSystem.current.SetSelectedGameObject(null);
         EventSystem.current.SetSelectedGameObject(uiObject);
     }
 
     private void UpdateTrophyDisplay()
     {
-        if (trophyUIImage == null) return;
+        if (trophyUIImage == null) return; // This already had a great null check!
 
         if (gameTimer <= goldTimeLimit)
         {

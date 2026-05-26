@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour
 
     // STATE
     public bool isHanging = false;
+    private bool dropInputLock = false; // NEW: Prevents instantly turning after a drop
     // Tracks the last floor block to prevent registering multiple steps per second
     Vector3Int lastStandingPos = new Vector3Int(9999, 9999, 9999);
 
@@ -91,7 +92,6 @@ public class PlayerController : MonoBehaviour
         {
             moveHoldTime = 0f;
 
-            // NEW: Safety check to keep arms completely disabled during countdown
             if (armsObject != null && armsObject.activeSelf)
             {
                 armsObject.SetActive(false);
@@ -100,7 +100,6 @@ public class PlayerController : MonoBehaviour
         }
 
         // --- GAME PLAYING STATE ---
-        // NEW: Automatically syncs the arms if the player was holding the button when the countdown ended
         if (armsObject != null && !isHanging && armsObject.activeSelf != interactHeld)
         {
             UpdateArmsState();
@@ -118,7 +117,6 @@ public class PlayerController : MonoBehaviour
     {
         if (armsObject == null) return;
 
-        // NEW: Prevent arms from being enabled manually if the game hasn't started
         if (GameManager.Instance != null && !GameManager.Instance.isPlaying)
         {
             armsObject.SetActive(false);
@@ -148,7 +146,6 @@ public class PlayerController : MonoBehaviour
     {
         if (dustParticlePrefab != null)
         {
-            // Spawn the dust at the block's position, shifted slightly down towards the floor
             Instantiate(dustParticlePrefab, position + (Vector3.down * 0.4f), Quaternion.Euler(-90, 0, 0));
         }
     }
@@ -268,7 +265,6 @@ public class PlayerController : MonoBehaviour
     {
         if (input.magnitude < 0.5f) return Vector3Int.zero;
 
-        // Fallback: If you ever test without a camera pivot, use the old absolute controls
         if (cameraPivot == null)
         {
             if (Mathf.Abs(input.x) > Mathf.Abs(input.y))
@@ -277,7 +273,6 @@ public class PlayerController : MonoBehaviour
                 return input.y > 0 ? Vector3Int.forward : Vector3Int.back;
         }
 
-        // 1. Get the camera's directional vectors and flatten them so we don't move into the floor/sky
         Vector3 camForward = cameraPivot.forward;
         Vector3 camRight = cameraPivot.right;
 
@@ -287,18 +282,14 @@ public class PlayerController : MonoBehaviour
         camForward.Normalize();
         camRight.Normalize();
 
-        // 2. Translate the 2D joystick/keyboard input into the camera's 3D orientation
         Vector3 desiredWorldDir = (camRight * input.x) + (camForward * input.y);
 
-        // 3. Snap that resulting 3D direction to the nearest absolute Grid Axis (X or Z)
         if (Mathf.Abs(desiredWorldDir.x) > Mathf.Abs(desiredWorldDir.z))
         {
-            // Moving mostly along the X axis
             return desiredWorldDir.x > 0 ? Vector3Int.right : Vector3Int.left;
         }
         else
         {
-            // Moving mostly along the Z axis
             return desiredWorldDir.z > 0 ? Vector3Int.forward : Vector3Int.back;
         }
     }
@@ -310,11 +301,16 @@ public class PlayerController : MonoBehaviour
     {
         Vector3Int dir = GetGridDirection(moveInput);
 
+        // NEW: If the player lets go of the stick, unlock their input
         if (dir == Vector3Int.zero)
         {
             moveHoldTime = 0f;
+            dropInputLock = false;
             return;
         }
+
+        // NEW: Block all moving/turning logic until they let go of the button
+        if (dropInputLock) return;
 
         moveHoldTime += Time.deltaTime;
 
@@ -370,6 +366,7 @@ public class PlayerController : MonoBehaviour
         else if (dir == -currentFacing)
         {
             isHanging = false;
+            dropInputLock = true; // NEW: Lock their input right after dropping!
             UpdateArmsState();
 
             Vector3Int searchPos = gridPosition;
@@ -514,12 +511,8 @@ public class PlayerController : MonoBehaviour
     {
         Vector3Int front = gridPosition + dir;
         Vector3Int aboveFront = front + Vector3Int.up;
-
-        // NEW: Calculate the space directly above the player's head
         Vector3Int abovePlayer = gridPosition + Vector3Int.up;
 
-        // Return true ONLY if there is a block in front, the space on top of that block is empty, 
-        // AND the space directly above the player is also empty.
         return HasBlock(front) && !HasBlock(aboveFront) && !HasBlock(abovePlayer);
     }
 
@@ -577,7 +570,6 @@ public class PlayerController : MonoBehaviour
         {
             for (int i = blocksToMove.Count - 1; i >= 0; i--)
             {
-                // NEW: Spawn dust at the OLD position before moving the block
                 SpawnDust(blocksToMove[i].position);
                 blocksToMove[i].position += (Vector3)dir;
             }
@@ -603,7 +595,6 @@ public class PlayerController : MonoBehaviour
 
         if (!HasBlock(behind))
         {
-            // NEW: Spawn dust at the block's OLD position before pulling it
             SpawnDust(blockPos);
 
             MoveBlock(blockPos, gridPosition);
@@ -687,14 +678,12 @@ public class PlayerController : MonoBehaviour
     {
         if (cameraPivot == null) return;
 
-        // NEW: Only allow the camera to rotate horizontally if the game is actually active
         if (GameManager.Instance != null && GameManager.Instance.isPlaying)
         {
             float rotation = lookInput.x * cameraSpeed * Time.deltaTime;
             cameraPivot.Rotate(Vector3.up, rotation);
         }
 
-        // Smooth Omnidirectional Tracking remains active so the camera behaves normally on spawn/snap
         Vector3 targetPos = transform.position;
         cameraPivot.position = Vector3.Lerp(cameraPivot.position, targetPos, cameraFollowSpeed * Time.deltaTime);
     }
