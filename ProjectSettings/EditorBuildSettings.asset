@@ -24,6 +24,9 @@ EditorBuildSettings:
     path: Assets/Scenes/Tower4.unity
     guid: b04b4c4f0904e9c4d9cee8f8c15e314e
   - enabled: 1
+    path: Assets/Scenes/Tower5.unity
+    guid: 827c9f689bc0682469f01b38a5a80a77
+  - enabled: 1
     path: Assets/Scenes/Tutorial.unity
     guid: e307eecb0cb711543a323b2701d9381b
   - enabled: 1
