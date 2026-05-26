@@ -5,6 +5,17 @@ using UnityEngine.UI;
 
 public class MainMenuManager : MonoBehaviour
 {
+    // A custom data structure to pair each level button with its child components
+    [System.Serializable]
+    public class LevelButtonData
+    {
+        public string levelName;          // Must match the exact Unity Scene name (e.g., "Tower1")
+        public Button buttonComponent;    // The Button component itself to turn clicking on/off
+        public GameObject levelText;      // Child object: The level number/name text
+        public GameObject trophyObject;   // Child object: The trophy Image object
+        public GameObject lockImage;      // Child object: The lock icon Image object
+    }
+
     [Header("Menu Groups (Canvases/Panels)")]
     public GameObject mainMenuGroup;
     public GameObject playGamesGroup;
@@ -21,10 +32,9 @@ public class MainMenuManager : MonoBehaviour
     public GameObject techniquesFirstBTN;   // e.g., ReturnBTN (if empty)
     public GameObject firstTimeFirstBTN;    // Your "Yes" button
 
-    [Header("Level Trophy UI Images")]
-    public Image tower1TrophyImage;
-    public Image tower2TrophyImage;
-    public Image tower3TrophyImage;
+    [Header("Level Progression System")]
+    [Tooltip("Add your level buttons here in consecutive order (Level 1, Level 2, Level 3...)")]
+    public LevelButtonData[] levels;
 
     [Header("Menu Trophy Sprites")]
     public Sprite emptyTrophySprite;
@@ -34,35 +44,76 @@ public class MainMenuManager : MonoBehaviour
 
     void Start()
     {
-        // 1. Load trophies right away
-        LoadAndDisplayTrophy("Tower1", tower1TrophyImage);
-        LoadAndDisplayTrophy("Tower2", tower2TrophyImage);
-        LoadAndDisplayTrophy("Tower3", tower3TrophyImage);
+        // 1. Process progression and update child objects dynamically
+        UpdateLevelProgression();
 
         // 2. Setup the initial menu state or handle incoming redirects
         if (PlayerPrefs.GetInt("AutoOpenTechniques", 0) == 1)
         {
-            // Clear the shortcut flag so it doesn't loop next time they launch the game
             PlayerPrefs.SetInt("AutoOpenTechniques", 0);
             PlayerPrefs.Save();
 
             if (firstTimeGroup != null) firstTimeGroup.SetActive(false);
-
-            // Open the techniques layout directly
             OpenTechniques();
         }
         else if (PlayerPrefs.GetInt("HasSeenTutorialPrompt", 0) == 1)
         {
-            // Player has been here before. Skip the prompt and open Main Menu.
             if (firstTimeGroup != null) firstTimeGroup.SetActive(false);
             OpenMainMenu();
         }
         else
         {
-            // Brand new player! Show the prompt.
-            HideAllMenus(); // Keep the background clean
+            HideAllMenus();
             if (firstTimeGroup != null) firstTimeGroup.SetActive(true);
             SetControllerFocus(firstTimeFirstBTN);
+        }
+    }
+
+    // ==========================================
+    // PROGRESSION LOCK/UNLOCK SYSTEM
+    // ==========================================
+    private void UpdateLevelProgression()
+    {
+        for (int i = 0; i < levels.Length; i++)
+        {
+            if (levels[i] == null) continue;
+
+            bool isUnlocked = false;
+
+            if (i == 0)
+            {
+                // The very first level button in the list is always unlocked by default
+                isUnlocked = true;
+            }
+            else
+            {
+                // Look at the PREVIOUS level in the array
+                string previousLevelName = levels[i - 1].levelName;
+                int previousLevelTrophy = PlayerPrefs.GetInt(previousLevelName + "_Trophy", 0);
+
+                // If previous level has a trophy score higher than 0, it means it was beaten!
+                isUnlocked = (previousLevelTrophy > 0);
+            }
+
+            // Apply the interactivity and child visibility states
+            if (levels[i].buttonComponent != null) levels[i].buttonComponent.interactable = isUnlocked;
+            if (levels[i].levelText != null) levels[i].levelText.SetActive(isUnlocked);
+            if (levels[i].lockImage != null) levels[i].lockImage.SetActive(!isUnlocked);
+
+            if (levels[i].trophyObject != null)
+            {
+                levels[i].trophyObject.SetActive(isUnlocked);
+
+                // If the level is unlocked, safely load whatever trophy sprite belongs here
+                if (isUnlocked)
+                {
+                    Image trophyImageComponent = levels[i].trophyObject.GetComponent<Image>();
+                    if (trophyImageComponent != null)
+                    {
+                        LoadAndDisplayTrophy(levels[i].levelName, trophyImageComponent);
+                    }
+                }
+            }
         }
     }
 
@@ -158,7 +209,32 @@ public class MainMenuManager : MonoBehaviour
 
     public void LoadScene(string levelName)
     {
-        SceneManager.LoadScene(levelName);
+        // Only allow loading the scene if the level is actually unlocked
+        // (Prevents bypassing via keyboard shortcuts/hacks if button is visually disabled)
+        if (IsLevelUnlocked(levelName))
+        {
+            SceneManager.LoadScene(levelName);
+        }
+        else
+        {
+            Debug.LogWarning("Attempted to load locked level: " + levelName);
+        }
+    }
+
+    private bool IsLevelUnlocked(string levelName)
+    {
+        // Find the index of this level in our system
+        for (int i = 0; i < levels.Length; i++)
+        {
+            if (levels[i].levelName == levelName)
+            {
+                if (i == 0) return true; // Level 1 is always open
+
+                string previousLevelName = levels[i - 1].levelName;
+                return PlayerPrefs.GetInt(previousLevelName + "_Trophy", 0) > 0;
+            }
+        }
+        return false;
     }
 
     public void ResetSaveData()
@@ -170,7 +246,13 @@ public class MainMenuManager : MonoBehaviour
 
     public void UnlockAll()
     {
-        Debug.Log("Unlock All clicked! Add your unlock logic here.");
+        // Give every level context a mock trophy entry so they all open up
+        for (int i = 0; i < levels.Length; i++)
+        {
+            PlayerPrefs.SetInt(levels[i].levelName + "_Trophy", 1);
+        }
+        PlayerPrefs.Save();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     private void LoadAndDisplayTrophy(string levelName, Image trophyImageToUpdate)
