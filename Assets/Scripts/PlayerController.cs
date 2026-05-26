@@ -215,12 +215,12 @@ public class PlayerController : MonoBehaviour
             if (hit.CompareTag("Victory"))
             {
                 GameManager.Instance.WinGame();
-                if (SceneManager.GetActiveScene().name == "Tower1")
+                if (SceneManager.GetActiveScene().name == "Tower2")
                 {
                     TechniqueUnlockManager.UnlockTechnique("Tech4");
                     TechniqueUnlockManager.UnlockTechnique("Tech5");
                 }
-                else if (SceneManager.GetActiveScene().name == "Tower2")
+                else if (SceneManager.GetActiveScene().name == "Tower4")
                 {
                     TechniqueUnlockManager.UnlockTechnique("Tech6");
                     TechniqueUnlockManager.UnlockTechnique("Tech7");
