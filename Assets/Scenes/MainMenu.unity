@@ -2538,7 +2538,7 @@ MonoBehaviour:
         m_MethodName: LoadAndPlayVideo
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 32900000, guid: 7c26e1e6ff8528442b98eda82beae3a2, type: 3}
+          m_ObjectArgument: {fileID: 32900000, guid: 966ca28186c043043b6ee1711a451956, type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Video.VideoClip, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -2800,7 +2800,7 @@ MonoBehaviour:
         m_MethodName: LoadAndPlayVideo
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 32900000, guid: 851aef2af0622234a97ee9c53682d9e4, type: 3}
+          m_ObjectArgument: {fileID: 32900000, guid: c8b47a01c91bb234593ed795379e8498, type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Video.VideoClip, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -5820,7 +5820,7 @@ MonoBehaviour:
         m_MethodName: LoadAndPlayVideo
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 32900000, guid: 5fb2230d28c15aa408d4a9b256af9bfa, type: 3}
+          m_ObjectArgument: {fileID: 32900000, guid: 59a56e9f8b6e97c49bfb40b7368a1c2d, type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Video.VideoClip, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -8989,49 +8989,49 @@ MonoBehaviour:
   techniquesBtnNewTag: {fileID: 611677824}
   techniques:
   - techniqueId: Tech1
-    displayName: Pyramid
+    displayName: Staircase
     unlockedByDefault: 1
     techniqueButton: {fileID: 1542821250}
     newTag: {fileID: 2108478154}
     lockIcon: {fileID: 297619665}
     techniqueText: {fileID: 189337487}
   - techniqueId: Tech2
-    displayName: Slider
+    displayName: Shifter
     unlockedByDefault: 1
     techniqueButton: {fileID: 410988724}
     newTag: {fileID: 411760101}
     lockIcon: {fileID: 2060402250}
     techniqueText: {fileID: 1761510461}
   - techniqueId: Tech3
-    displayName: Spider
+    displayName: Wall-Crawler
     unlockedByDefault: 1
     techniqueButton: {fileID: 2006249237}
     newTag: {fileID: 561708427}
     lockIcon: {fileID: 1974504205}
     techniqueText: {fileID: 1369981371}
   - techniqueId: Tech4
-    displayName: Suspending
+    displayName: Cliff
     unlockedByDefault: 0
     techniqueButton: {fileID: 1773353056}
     newTag: {fileID: 2097186812}
     lockIcon: {fileID: 1372244355}
     techniqueText: {fileID: 628576348}
   - techniqueId: Tech5
-    displayName: Pullback
+    displayName: Under-Pull
     unlockedByDefault: 0
     techniqueButton: {fileID: 2133534259}
     newTag: {fileID: 863660294}
     lockIcon: {fileID: 777566250}
     techniqueText: {fileID: 1738270472}
   - techniqueId: Tech6
-    displayName: Tornado
+    displayName: Orbit
     unlockedByDefault: 0
     techniqueButton: {fileID: 405443664}
     newTag: {fileID: 328329653}
     lockIcon: {fileID: 1663933370}
     techniqueText: {fileID: 364509171}
   - techniqueId: Tech7
-    displayName: Bridge
+    displayName: Gapping
     unlockedByDefault: 0
     techniqueButton: {fileID: 868576675}
     newTag: {fileID: 117875496}
@@ -10328,7 +10328,7 @@ MonoBehaviour:
         m_MethodName: LoadAndPlayVideo
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 32900000, guid: fe6fbdb83b289f74592f7ca5f2b6632d, type: 3}
+          m_ObjectArgument: {fileID: 32900000, guid: 5f4ba33a673d35c478fc7e9ad96b50d7, type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Video.VideoClip, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -11979,7 +11979,7 @@ MonoBehaviour:
         m_MethodName: LoadAndPlayVideo
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 32900000, guid: e6b5a209cb8eff444b177e16415a0e8c, type: 3}
+          m_ObjectArgument: {fileID: 32900000, guid: aa79d4138c985ca48af806d514c3e192, type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Video.VideoClip, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -13439,7 +13439,7 @@ MonoBehaviour:
         m_MethodName: LoadAndPlayVideo
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 32900000, guid: 603be3ffd7709f8449d27e9383269dfc, type: 3}
+          m_ObjectArgument: {fileID: 32900000, guid: 31c33fb08103ff7408ec0c3d3c6e759f, type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Video.VideoClip, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -13899,7 +13899,7 @@ MonoBehaviour:
         m_MethodName: LoadAndPlayVideo
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 32900000, guid: 13b793dfeb91d874d94d3243fbccf09f, type: 3}
+          m_ObjectArgument: {fileID: 32900000, guid: 215b8d6475914c2428180dea6b2fc3da, type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Video.VideoClip, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
