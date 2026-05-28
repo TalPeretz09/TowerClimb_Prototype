@@ -15,6 +15,9 @@ public class MainMenuManager : MonoBehaviour
         public GameObject lockImage;
     }
 
+    // ==========================================
+    // MENU HIERARCHY GROUPS
+    // ==========================================
     [Header("Menu Groups (Canvases/Panels)")]
     public GameObject mainMenuGroup;
     public GameObject playGamesGroup;
@@ -23,6 +26,9 @@ public class MainMenuManager : MonoBehaviour
     public GameObject techniquesGroup;
     public GameObject firstTimeGroup;
 
+    // ==========================================
+    // UI NAVIGATION FOCUS TARGETS
+    // ==========================================
     [Header("Default Selected Buttons")]
     public GameObject mainMenuFirstBTN;
     public GameObject playGamesFirstBTN;
@@ -31,12 +37,15 @@ public class MainMenuManager : MonoBehaviour
     public GameObject techniquesFirstBTN;
     public GameObject firstTimeFirstBTN;
 
+    // ==========================================
+    // PROGRESSION & DATABASES
+    // ==========================================
     [Header("Level Progression System")]
     public LevelButtonData[] levels;
 
     [Header("Technique System Link")]
     [Tooltip("Drag the GameObject with your TechniqueUnlockManager here")]
-    public TechniqueUnlockManager techniqueUnlockManager; // NEW: Reference to your existing manager
+    public TechniqueUnlockManager techniqueUnlockManager;
 
     [Header("Menu Trophy Sprites")]
     public Sprite emptyTrophySprite;
@@ -46,8 +55,10 @@ public class MainMenuManager : MonoBehaviour
 
     void Start()
     {
+        // Evaluate level states based on disk data before rendering the screen.
         UpdateLevelProgression();
 
+        // Router logic to automatically direct players to the correct deep-linked interface on startup.
         if (PlayerPrefs.GetInt("AutoOpenTechniques", 0) == 1)
         {
             PlayerPrefs.SetInt("AutoOpenTechniques", 0);
@@ -74,7 +85,7 @@ public class MainMenuManager : MonoBehaviour
     // ==========================================
     private void UpdateLevelProgression()
     {
-        // NEW: Check if the player has clicked "Unlock All"
+        // Global administrative toggle that overrides standard progression rules for sandboxing.
         bool overrideUnlockAll = PlayerPrefs.GetInt("UnlockAllOverride", 0) == 1;
 
         for (int i = 0; i < levels.Length; i++)
@@ -83,7 +94,7 @@ public class MainMenuManager : MonoBehaviour
 
             bool isUnlocked = false;
 
-            // If it's Level 1 OR the player used the Unlock All tool, it opens up
+            // Level 1 is accessible by default. Subsequent levels require a valid trophy on the prior stage.
             if (i == 0 || overrideUnlockAll)
             {
                 isUnlocked = true;
@@ -95,6 +106,7 @@ public class MainMenuManager : MonoBehaviour
                 isUnlocked = (previousLevelTrophy > 0);
             }
 
+            // Sync structural UI visibility to match calculated access permissions.
             if (levels[i].buttonComponent != null) levels[i].buttonComponent.interactable = isUnlocked;
             if (levels[i].levelText != null) levels[i].levelText.SetActive(isUnlocked);
             if (levels[i].lockImage != null) levels[i].lockImage.SetActive(!isUnlocked);
@@ -116,34 +128,18 @@ public class MainMenuManager : MonoBehaviour
     }
 
     // ==========================================
-    // MODULAR MENU NAVIGATION
+    // MODULAR MENU NAVIGATION INTERFACES
     // ==========================================
-
-    public void OpenMainMenu()
-    {
-        SwitchToMenu(mainMenuGroup, mainMenuFirstBTN);
-    }
-
-    public void OpenPlayGames()
-    {
-        SwitchToMenu(playGamesGroup, playGamesFirstBTN);
-    }
-
-    public void OpenTraining()
-    {
-        SwitchToMenu(trainingGroup, trainingFirstBTN);
-    }
-
-    public void OpenTools()
-    {
-        SwitchToMenu(toolsGroup, toolsFirstBTN);
-    }
+    public void OpenMainMenu() => SwitchToMenu(mainMenuGroup, mainMenuFirstBTN);
+    public void OpenPlayGames() => SwitchToMenu(playGamesGroup, playGamesFirstBTN);
+    public void OpenTraining() => SwitchToMenu(trainingGroup, trainingFirstBTN);
+    public void OpenTools() => SwitchToMenu(toolsGroup, toolsFirstBTN);
 
     public void OpenTechniques()
     {
         SwitchToMenu(techniquesGroup, techniquesFirstBTN);
 
-        // Optionally: Refresh techniques UI when opening the menu
+        // Force a UI canvas validation refresh to account for newly registered unlock states.
         if (techniqueUnlockManager != null)
         {
             techniqueUnlockManager.RefreshUI();
@@ -151,9 +147,8 @@ public class MainMenuManager : MonoBehaviour
     }
 
     // ==========================================
-    // CORE SYSTEM HELPERS
+    // CORE SYSTEM SUBSYSTEM HELPERS
     // ==========================================
-
     private void SwitchToMenu(GameObject menuToOpen, GameObject buttonToFocus)
     {
         HideAllMenus();
@@ -174,15 +169,16 @@ public class MainMenuManager : MonoBehaviour
     {
         if (targetButton != null)
         {
+            // Fully purge the event selection context before assigning a new target.
+            // This prevents gamepad state desynchronization or visual ghost-highlight highlights.
             EventSystem.current.SetSelectedGameObject(null);
             EventSystem.current.SetSelectedGameObject(targetButton);
         }
     }
 
     // ==========================================
-    // FIRST TIME PROMPT LOGIC
+    // FIRST TIME PROMPT INTERACTION
     // ==========================================
-
     public void PlayTutorial(string tutorialSceneName)
     {
         MarkTutorialPromptAsSeen();
@@ -203,9 +199,8 @@ public class MainMenuManager : MonoBehaviour
     }
 
     // ==========================================
-    // GAMEPLAY & TOOL LOGIC
+    // LEVEL LOAD & ADMINISTRATIVE TOOLS
     // ==========================================
-
     public void LoadLevel(string levelName)
     {
         if (IsLevelUnlocked(levelName))
@@ -225,7 +220,6 @@ public class MainMenuManager : MonoBehaviour
 
     private bool IsLevelUnlocked(string levelName)
     {
-        // Check the master override first
         if (PlayerPrefs.GetInt("UnlockAllOverride", 0) == 1) return true;
 
         for (int i = 0; i < levels.Length; i++)
@@ -243,17 +237,18 @@ public class MainMenuManager : MonoBehaviour
 
     public void ResetSaveData()
     {
-        PlayerPrefs.DeleteAll(); // This also clears the new UnlockAllOverride
+        // Flush all persistent profile parameters from internal storage and reload runtime context.
+        PlayerPrefs.DeleteAll();
         PlayerPrefs.Save();
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     public void UnlockAll()
     {
-        // 1. Activate the master override for level buttons (keeps trophy scores at 0)
+        // 1. Force state flags to mock unlock states without polluting high scores with unearned trophies.
         PlayerPrefs.SetInt("UnlockAllOverride", 1);
 
-        // 2. Unlock all techniques using your existing static method
+        // 2. Map structural database iterations directly into static subsystem dependencies.
         if (techniqueUnlockManager != null)
         {
             foreach (var tech in techniqueUnlockManager.techniques)
@@ -268,7 +263,7 @@ public class MainMenuManager : MonoBehaviour
 
         PlayerPrefs.Save();
 
-        // Reload scene to visually update all locks, tags, and buttons
+        // Hard reset the interface hierarchy layout to cascade changes through standard rendering loops.
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
@@ -278,13 +273,14 @@ public class MainMenuManager : MonoBehaviour
 
         int savedTrophy = PlayerPrefs.GetInt(levelName + "_Trophy", 0);
 
+        // Map discrete grading boundaries cleanly to configured editor sprites.
         switch (savedTrophy)
         {
             case 3: trophyImageToUpdate.sprite = goldMenuSprite; break;
             case 2: trophyImageToUpdate.sprite = silverMenuSprite; break;
             case 1: trophyImageToUpdate.sprite = bronzeMenuSprite; break;
             case 0:
-            default: trophyImageToUpdate.sprite = emptyTrophySprite; break; // This now correctly fires for Unlock All!
+            default: trophyImageToUpdate.sprite = emptyTrophySprite; break;
         }
     }
 }

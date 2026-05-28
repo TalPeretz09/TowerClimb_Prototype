@@ -4,10 +4,12 @@ using System.Collections;
 public class CrackedBlock : MonoBehaviour
 {
     [Header("Settings")]
-    public int stepsToBreak = 2; // NEW: Set to 1 for your new block, 2 for the old one
+    // The total number of discrete step interactions allowed before the block collapses.
+    public int stepsToBreak = 2;
 
     [Header("Materials")]
-    public Material crackMat2; // You can leave this empty for Cracked1
+    // Material applied to represent visual degradation when the block enters a damaged state.
+    public Material crackMat2;
 
     private int stepCount = 0;
     private bool isDestroying = false;
@@ -15,16 +17,18 @@ public class CrackedBlock : MonoBehaviour
 
     void Awake()
     {
+        // Cache the local renderer component to avoid runtime lookup overhead.
         blockRenderer = GetComponent<Renderer>();
     }
 
     public void OnStepped()
     {
+        // Guard against redundant execution if the destruction sequence is already active.
         if (isDestroying) return;
 
         stepCount++;
 
-        // If we haven't reached the breaking point yet, apply the damaged material
+        // Apply progressive visual feedback if the degradation threshold has not been reached.
         if (stepCount < stepsToBreak)
         {
             if (blockRenderer != null && crackMat2 != null)
@@ -32,7 +36,7 @@ public class CrackedBlock : MonoBehaviour
                 blockRenderer.material = crackMat2;
             }
         }
-        // If we hit the step limit, initiate destruction
+        // Initiate the collapse routine once the step limit is satisfied.
         else if (stepCount >= stepsToBreak)
         {
             isDestroying = true;
@@ -42,6 +46,7 @@ public class CrackedBlock : MonoBehaviour
 
     IEnumerator DestroyAfterDelay()
     {
+        // Provide a brief temporal window for player traversal or reaction before object disposal.
         yield return new WaitForSeconds(0.8f);
         Destroy(gameObject);
     }

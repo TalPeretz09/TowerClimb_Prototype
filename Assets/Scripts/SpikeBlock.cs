@@ -4,17 +4,17 @@ using System.Collections;
 public class SpikeBlock : MonoBehaviour
 {
     [Header("Visuals")]
-    public GameObject spikeVisual; // The spike that kills you
+    public GameObject spikeVisual;     // The visual representation of the hazard.
 
     [Header("Post-Activation")]
-    public Renderer indicatorRenderer; // The child object that will turn green
-    public Material safeMaterial;      // Your green material
+    public Renderer indicatorRenderer; // The renderer used to display the block's current safety state.
+    public Material safeMaterial;      // The material applied once the trap has been safely disarmed.
 
     private bool hasTriggered = false;
 
     void Start()
     {
-        // Make sure the spike is hidden when the game starts
+        // Ensure the hazard visual is disabled upon initialization.
         if (spikeVisual != null)
         {
             spikeVisual.SetActive(false);
@@ -23,7 +23,7 @@ public class SpikeBlock : MonoBehaviour
 
     public void OnStepped(PlayerController player)
     {
-        // If the trap has EVER been triggered, ignore all future steps
+        // Prevent re-triggering if the trap has already been activated.
         if (hasTriggered) return;
 
         hasTriggered = true;
@@ -32,20 +32,20 @@ public class SpikeBlock : MonoBehaviour
 
     IEnumerator ActivateSpike(PlayerController player)
     {
-        // Wait for the trap delay
+        // Delay before the hazard becomes active and potentially lethal.
         yield return new WaitForSeconds(0.65f);
 
-        // Turn on the spike visual
+        // Enable the hazard visual to indicate activation.
         if (spikeVisual != null)
         {
             spikeVisual.SetActive(true);
         }
 
-        // Determine the space directly above this block
+        // Calculate the lethal zone immediately above the block's current position.
         Vector3Int blockPos = Vector3Int.RoundToInt(transform.position);
         Vector3Int killZone = blockPos + Vector3Int.up;
 
-        // Check if the player still exists AND is still standing exactly in the kill zone
+        // Verify if the player is still present in the calculated kill zone.
         if (player != null && player.gridPosition == killZone)
         {
             if (GameManager.Instance != null)
@@ -56,7 +56,7 @@ public class SpikeBlock : MonoBehaviour
             Destroy(player.gameObject);
         }
 
-        // Wait 1 second before retracting the spike
+        // Keep the hazard active briefly before retracting it.
         yield return new WaitForSeconds(1.0f);
 
         if (spikeVisual != null)
@@ -64,13 +64,12 @@ public class SpikeBlock : MonoBehaviour
             spikeVisual.SetActive(false);
         }
 
-        // Change the material of your new child gameobject to green
+        // Update the block's indicator to visually signify it is now safe to traverse.
         if (indicatorRenderer != null && safeMaterial != null)
         {
             indicatorRenderer.material = safeMaterial;
         }
 
-        // Notice we deliberately DO NOT set hasTriggered to false down here anymore.
-        // This permanently locks the block in its "safe" state!
+        // The state flag remains true to permanently disable the trap for the remainder of the session.
     }
 }

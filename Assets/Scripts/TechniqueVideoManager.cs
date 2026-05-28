@@ -15,7 +15,7 @@ public class TechniqueVideoManager : MonoBehaviour
 
     private void Awake()
     {
-        // Tell Unity to run our "OnVideoFinished" function the exact moment any video ends
+        // Subscribe to the loopPointReached event to execute logic upon video completion.
         if (videoPlayer != null)
         {
             videoPlayer.loopPointReached += OnVideoFinished;
@@ -24,7 +24,7 @@ public class TechniqueVideoManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        // Clean up the event listener when the script is destroyed to avoid memory leaks
+        // Unsubscribe from the event listener to prevent memory leaks when the object is destroyed.
         if (videoPlayer != null)
         {
             videoPlayer.loopPointReached -= OnVideoFinished;
@@ -33,6 +33,7 @@ public class TechniqueVideoManager : MonoBehaviour
 
     void OnEnable()
     {
+        // Ensure the video player is reset to its default state whenever the component is enabled.
         ResetVideoPlayer();
     }
 
@@ -40,21 +41,20 @@ public class TechniqueVideoManager : MonoBehaviour
     // 1. LOAD VIDEO (WITHOUT AUTOPLAY)
     // ==========================================
 
-    // Kept the method name the same so you don't have to re-link your buttons!
     public void LoadAndPlayVideo(VideoClip newClip)
     {
         if (newClip == null) return;
 
+        // Enable the RawImage component to display the video feed.
         if (videoDisplay != null) videoDisplay.enabled = true;
 
-        // Assign the clip
         videoPlayer.clip = newClip;
 
-        // Pause immediately so it cues up the first frame but doesn't play
+        // Pause playback immediately to queue the first frame without auto-playing.
         videoPlayer.Pause();
         videoPlayer.frame = 0;
 
-        // Keep the icon as the Play triangle since the video is waiting
+        // Set the UI toggle state to display the play icon.
         playPauseIcon.sprite = playSprite;
     }
 
@@ -66,6 +66,7 @@ public class TechniqueVideoManager : MonoBehaviour
     {
         if (videoPlayer.clip == null) return;
 
+        // Toggle between playing and paused states, updating the UI icon accordingly.
         if (videoPlayer.isPlaying)
         {
             videoPlayer.Pause();
@@ -82,12 +83,12 @@ public class TechniqueVideoManager : MonoBehaviour
     // 3. AUTOMATIC RESET ON FINISH
     // ==========================================
 
-    // This runs automatically via the event we hooked up in Awake()
+    // Event handler triggered when the video reaches its end.
     private void OnVideoFinished(VideoPlayer source)
     {
-        source.Pause();             // Stop playback
-        source.frame = 0;           // Rewind completely back to the start
-        playPauseIcon.sprite = playSprite; // Swap icon back to the Play triangle
+        source.Pause();                    // Halt playback at the end of the clip.
+        source.frame = 0;                  // Reset the timeline to the first frame.
+        playPauseIcon.sprite = playSprite; // Revert the UI state to the play icon.
     }
 
     // ==========================================
@@ -96,10 +97,12 @@ public class TechniqueVideoManager : MonoBehaviour
 
     public void ResetVideoPlayer()
     {
+        // Stop playback, clear the assigned clip, and reset UI elements to their default states.
         videoPlayer.Stop();
         videoPlayer.clip = null;
         playPauseIcon.sprite = playSprite;
 
+        // Disable the display to ensure a blank state when the menu is reopened.
         if (videoDisplay != null) videoDisplay.enabled = false;
     }
 }

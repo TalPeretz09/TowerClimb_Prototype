@@ -29,6 +29,7 @@ public class TechniqueUnlockManager : MonoBehaviour
     {
         foreach (var tech in techniques)
         {
+            // Capture the loop variable locally to prevent closure-scoping issues during asynchronous delegate execution.
             TechniqueUI currentTech = tech;
             currentTech.techniqueButton.onClick.AddListener(() => MarkTechniqueAsViewed(currentTech));
         }
@@ -42,7 +43,10 @@ public class TechniqueUnlockManager : MonoBehaviour
 
         foreach (var tech in techniques)
         {
+            // Determine baseline data alignment if no existing key is found in local storage.
             int defaultState = tech.unlockedByDefault ? 1 : 0;
+
+            // Core data conventions: 0 = Locked, 1 = Unlocked & Unviewed (New), 2 = Unlocked & Viewed.
             int currentState = PlayerPrefs.GetInt("TechState_" + tech.techniqueId, defaultState);
 
             if (currentState == 0) // LOCKED
@@ -70,6 +74,7 @@ public class TechniqueUnlockManager : MonoBehaviour
             }
         }
 
+        // Update high-level notification badges across the UI hierarchy if new content remains unseen.
         if (trainingBtnNewTag != null) trainingBtnNewTag.SetActive(anyTechniqueIsNew);
         if (techniquesBtnNewTag != null) techniquesBtnNewTag.SetActive(anyTechniqueIsNew);
     }
@@ -79,16 +84,21 @@ public class TechniqueUnlockManager : MonoBehaviour
         int defaultState = tech.unlockedByDefault ? 1 : 0;
         int currentState = PlayerPrefs.GetInt("TechState_" + tech.techniqueId, defaultState);
 
+        // Transition the entity state only if it is currently flagged as unlocked but unviewed.
         if (currentState == 1)
         {
             PlayerPrefs.SetInt("TechState_" + tech.techniqueId, 2);
-            PlayerPrefs.Save();
+            PlayerPrefs.Save(); // Ensure disk serialization to preserve session profile state.
             RefreshUI();
         }
     }
 
+    /// <summary>
+    /// Static interface to allow external gameplay systems to safely progress a specific technique tracking state.
+    /// </summary>
     public static void UnlockTechnique(string specificTechId)
     {
+        // Enforce progressive unlocking logic only if the specified asset profile is completely locked.
         if (PlayerPrefs.GetInt("TechState_" + specificTechId, 0) == 0)
         {
             PlayerPrefs.SetInt("TechState_" + specificTechId, 1);

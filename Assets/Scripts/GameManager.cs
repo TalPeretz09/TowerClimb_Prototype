@@ -13,13 +13,13 @@ public class GameManager : MonoBehaviour
     public GameObject startPanel;
     public GameObject winPanel;
     public GameObject losePanel;
-    public GameObject techniqueUnlockPanel; // NEW: The technique popup panel
+    public GameObject techniqueUnlockPanel;
 
     [Header("UI First Selected Buttons")]
     public GameObject startButton;
     public GameObject winRestartButton;
     public GameObject loseRestartButton;
-    public GameObject techniqueYesButton;   // NEW: Highlighted button for technique panel
+    public GameObject techniqueYesButton;
 
     [Header("UI Text Elements")]
     public TextMeshProUGUI countdownText;
@@ -27,8 +27,8 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI finalTimeText;
 
     [Header("Trophy System")]
-    public Image trophyUIImage; // The HUD shrinking trophy
-    public Image finalTrophyImage; // NEW: The final trophy shown on the Win Panel
+    public Image trophyUIImage;
+    public Image finalTrophyImage;
     public Sprite goldSprite;
     public Sprite silverSprite;
     public Sprite bronzeSprite;
@@ -41,18 +41,19 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
+        // Enforce the singleton lifecycle architecture pattern.
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
     }
 
     void Start()
     {
+        // Establish baseline initial interface visibility profiles.
         if (startPanel != null) startPanel.SetActive(true);
         if (winPanel != null) winPanel.SetActive(false);
         if (losePanel != null) losePanel.SetActive(false);
-        if (techniqueUnlockPanel != null) techniqueUnlockPanel.SetActive(false); // Ensure panel starts closed
+        if (techniqueUnlockPanel != null) techniqueUnlockPanel.SetActive(false);
 
-        // Null checks added here
         if (countdownText != null) countdownText.gameObject.SetActive(false);
         if (timerText != null) timerText.gameObject.SetActive(false);
 
@@ -61,6 +62,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        // Track core gameplay duration metrics asynchronously when the play state is active.
         if (isPlaying)
         {
             gameTimer += Time.deltaTime;
@@ -78,6 +80,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator CountdownRoutine()
     {
+        // Sequential state sequence mapping the pre-game countdown frames.
         if (countdownText != null)
         {
             countdownText.gameObject.SetActive(true);
@@ -98,7 +101,6 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            // If there's no countdown text, just wait a brief moment before starting
             yield return new WaitForSeconds(1f);
         }
 
@@ -113,44 +115,41 @@ public class GameManager : MonoBehaviour
 
         isPlaying = false;
 
-        // Null checks added here
         if (timerText != null) timerText.gameObject.SetActive(false);
         if (trophyUIImage != null) trophyUIImage.gameObject.SetActive(false);
 
         UpdateTimerDisplay(gameTimer, finalTimeText);
 
-        // Figure out which trophy they earned as a number
-        int earnedTrophyValue = 1; // Default to Bronze (1)
+        // Grade runtime completion speeds into standard tier archetypes.
+        int earnedTrophyValue = 1; // Default: Bronze
 
         if (finalTrophyImage != null)
         {
             if (gameTimer <= goldTimeLimit)
             {
                 finalTrophyImage.sprite = goldSprite;
-                earnedTrophyValue = 3; // Gold (3)
+                earnedTrophyValue = 3; // Gold
             }
             else if (gameTimer <= silverTimeLimit)
             {
                 finalTrophyImage.sprite = silverSprite;
-                earnedTrophyValue = 2; // Silver (2)
+                earnedTrophyValue = 2; // Silver
             }
             else
             {
                 finalTrophyImage.sprite = bronzeSprite;
-                // Remains Bronze (1)
             }
         }
 
         // ==========================================
-        // CHECK FIRST TIME WIN & SAVE DATA
+        // PERSISTENCE & DATA EXTRACTION LOGIC
         // ==========================================
         string currentLevelName = SceneManager.GetActiveScene().name;
 
-        // Look up the previously saved trophy (defaults to 0 if they haven't played/won yet)
         int savedTrophyValue = PlayerPrefs.GetInt(currentLevelName + "_Trophy", 0);
         bool isFirstTimeWin = (savedTrophyValue == 0);
 
-        // If the trophy they just got is better than their saved one, save it
+        // Commit progression metrics if the current clear tier exceeds historic records.
         if (earnedTrophyValue > savedTrophyValue)
         {
             PlayerPrefs.SetInt(currentLevelName + "_Trophy", earnedTrophyValue);
@@ -158,24 +157,23 @@ public class GameManager : MonoBehaviour
         }
 
         // ==========================================
-        // PANEL ROUTING LOGIC
+        // CANVAS COMPONENT ROUTING PIPELINE
         // ==========================================
         if (isFirstTimeWin && techniqueUnlockPanel != null)
         {
-            // First time completing! Route to the Technique screen instead of the win panel
+            // Direct new victors straight to the technique unlock dialogue interface.
             techniqueUnlockPanel.SetActive(true);
             SelectUIObject(techniqueYesButton);
         }
         else
         {
-            // Regular win sequence
             if (winPanel != null) winPanel.SetActive(true);
             SelectUIObject(winRestartButton);
         }
     }
 
     // ==========================================
-    // NEW: TECHNIQUE PANEL BUTTON INTERFACES
+    // DEEP-LINK INTERACTION INTERFACES
     // ==========================================
     public void OnTechniqueNoPressed()
     {
@@ -186,7 +184,7 @@ public class GameManager : MonoBehaviour
 
     public void OnTechniqueYesPressed()
     {
-        // Drop a navigation flag so the main menu knows to skip straight to techniques
+        // Cache a programmatic routing deep-link flag prior to system context switches.
         PlayerPrefs.SetInt("AutoOpenTechniques", 1);
         PlayerPrefs.Save();
 
@@ -197,7 +195,6 @@ public class GameManager : MonoBehaviour
     {
         isPlaying = false;
 
-        // Null checks added here
         if (timerText != null) timerText.gameObject.SetActive(false);
         if (trophyUIImage != null) trophyUIImage.gameObject.SetActive(false);
 
@@ -228,6 +225,8 @@ public class GameManager : MonoBehaviour
     private void SelectUIObject(GameObject uiObject)
     {
         if (uiObject == null) return;
+
+        // Isolate context selections fully to support navigation switching across input mechanics.
         EventSystem.current.SetSelectedGameObject(null);
         EventSystem.current.SetSelectedGameObject(uiObject);
     }
@@ -236,6 +235,7 @@ public class GameManager : MonoBehaviour
     {
         if (trophyUIImage == null) return;
 
+        // Calculate and apply localized delta distributions to step down HUD radial layouts dynamically.
         if (gameTimer <= goldTimeLimit)
         {
             trophyUIImage.sprite = goldSprite;

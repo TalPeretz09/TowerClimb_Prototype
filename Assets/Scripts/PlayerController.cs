@@ -5,42 +5,59 @@ using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
-    // INPUT
+    // =========================
+    // INPUT STATE
+    // =========================
     PlayerInputActions input;
     Vector2 moveInput;
     Vector2 lookInput;
     bool interactHeld;
 
-    // GRID
+    // =========================
+    // GRID & SPATIAL STATE
+    // =========================
     public Vector3Int gridPosition;
     Vector3Int currentFacing = Vector3Int.forward;
 
-    // STATE
+    // =========================
+    // CHARACTER STATE
+    // =========================
     public bool isHanging = false;
-    private bool dropInputLock = false; // NEW: Prevents instantly turning after a drop
-    // Tracks the last floor block to prevent registering multiple steps per second
+
+    // Prevents immediate re-registration of movement input upon transitioning out of a hang state.
+    private bool dropInputLock = false;
+
+    // Caches the coordinates of the last occupied floor tile to ensure step-based traps only trigger once per entry.
     Vector3Int lastStandingPos = new Vector3Int(9999, 9999, 9999);
 
-    // TIMING
+    // =========================
+    // TIMING PARAMETERS
+    // =========================
     float moveHoldTime = 0f;
     float holdThreshold = 0.1f;
 
-    // CAMERA
+    // =========================
+    // CAMERA REFERENCES
+    // =========================
     [Header("Camera")]
     public Transform cameraPivot;
     public float cameraSpeed = 120f;
     public float cameraFollowSpeed = 5f;
 
-    // VISUALS
+    // =========================
+    // VISUAL REFERENCES
+    // =========================
     [Header("Visuals")]
     public GameObject armsObject;
     public GameObject dustParticlePrefab;
 
+    // Caches the default transform properties of the arm visuals to properly restore them after contextual animations.
     private Vector3 originalArmsPos;
     private Quaternion originalArmsRot;
 
     void Awake()
     {
+        // Initialize the Input System and subscribe to standard context events.
         input = new PlayerInputActions();
 
         input.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
@@ -67,9 +84,11 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        // Snap the player to an absolute integer-based grid position upon spawning.
         gridPosition = Vector3Int.RoundToInt(transform.position);
         transform.position = gridPosition;
 
+        // Align the camera pivot to match the player's initial vertical level.
         if (cameraPivot != null)
         {
             Vector3 startPos = cameraPivot.position;
@@ -77,6 +96,7 @@ public class PlayerController : MonoBehaviour
             cameraPivot.position = startPos;
         }
 
+        // Cache initial visual states and hide conditional visuals by default.
         if (armsObject != null)
         {
             originalArmsPos = armsObject.transform.localPosition;
@@ -87,7 +107,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        // --- COUNTDOWN / PAUSE STATE ---
+        // Halt core logic and hide interaction visuals if the game is globally paused or in a countdown phase.
         if (GameManager.Instance != null && !GameManager.Instance.isPlaying)
         {
             moveHoldTime = 0f;
@@ -99,7 +119,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // --- GAME PLAYING STATE ---
+        // Dynamically update contextual visuals if the player's physical state changes.
         if (armsObject != null && !isHanging && armsObject.activeSelf != interactHeld)
         {
             UpdateArmsState();
@@ -111,12 +131,13 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
-    // ARMS STATE MANAGER
+    // VISUAL STATE MANAGER
     // =========================
     void UpdateArmsState()
     {
         if (armsObject == null) return;
 
+        // Force disable visual interactions if game execution is halted.
         if (GameManager.Instance != null && !GameManager.Instance.isPlaying)
         {
             armsObject.SetActive(false);
@@ -125,6 +146,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        // Apply a specific positional offset and rotation when the player is suspended from a ledge.
         if (isHanging)
         {
             armsObject.SetActive(true);
@@ -133,6 +155,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
+            // Revert to standard interaction display based on input polling.
             armsObject.SetActive(interactHeld);
             armsObject.transform.localPosition = originalArmsPos;
             armsObject.transform.localRotation = originalArmsRot;
@@ -140,10 +163,11 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
-    // EFFECTS
+    // ENVIRONMENTAL EFFECTS
     // =========================
     void SpawnDust(Vector3 position)
     {
+        // Instantiates feedback geometry slightly below the block's origin to align with the floor.
         if (dustParticlePrefab != null)
         {
             Instantiate(dustParticlePrefab, position + (Vector3.down * 0.4f), Quaternion.Euler(-90, 0, 0));
@@ -151,12 +175,13 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
-    // GRAVITY
+    // GRAVITY RESOLUTION
     // =========================
     void CheckGravity()
     {
         if (isHanging) return;
 
+        // Cast downwards to identify supporting geometry. If unsupported, force the player down to the nearest valid floor.
         if (!CanStand(gridPosition))
         {
             Vector3Int searchPos = gridPosition;
@@ -176,10 +201,13 @@ public class PlayerController : MonoBehaviour
             {
                 gridPosition = searchPos;
                 transform.position = gridPosition;
+
+                // Reset the interaction cache to ensure traps register the new vertical arrival.
                 lastStandingPos = new Vector3Int(9999, 9999, 9999);
             }
             else
             {
+                // Trigger loss state if the downward cast exceeds expected world bounds (falling into the void).
                 if (GameManager.Instance != null)
                 {
                     GameManager.Instance.LoseGame();
@@ -190,7 +218,7 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
-    // FLOOR INTERACTIONS
+    // FLOOR TRIGGERS
     // =========================
     void CheckFloorInteractions()
     {
@@ -215,6 +243,8 @@ public class PlayerController : MonoBehaviour
             if (hit.CompareTag("Victory"))
             {
                 GameManager.Instance.WinGame();
+
+                // Hardcoded technique unlocks triggered upon specific level completion events.
                 if (SceneManager.GetActiveScene().name == "Tower2")
                 {
                     TechniqueUnlockManager.UnlockTechnique("Tech4");
@@ -226,6 +256,8 @@ public class PlayerController : MonoBehaviour
                     TechniqueUnlockManager.UnlockTechnique("Tech7");
                 }
             }
+
+            // Only execute hazard logic if the player has fully transitioned onto a new grid tile.
             if (hasMovedToNewBlock)
             {
                 if (hit.CompareTag("Cracked1") || hit.CompareTag("Cracked2"))
@@ -255,16 +287,19 @@ public class PlayerController : MonoBehaviour
 
     void LateUpdate()
     {
+        // Defer camera movement to LateUpdate to ensure it interpolates smoothly after all positional physics have been processed.
         HandleCamera();
     }
 
     // =========================
-    // INPUT -> GRID DIRECTION
+    // INPUT DIRECTION MAPPING
     // =========================
     Vector3Int GetGridDirection(Vector2 input)
     {
+        // Enforce an analog deadzone to prevent drift.
         if (input.magnitude < 0.5f) return Vector3Int.zero;
 
+        // Fallback to absolute cardinal directions if the camera pivot is missing.
         if (cameraPivot == null)
         {
             if (Mathf.Abs(input.x) > Mathf.Abs(input.y))
@@ -273,6 +308,7 @@ public class PlayerController : MonoBehaviour
                 return input.y > 0 ? Vector3Int.forward : Vector3Int.back;
         }
 
+        // Map relative 2D input to global 3D space relative to the current camera viewing angle.
         Vector3 camForward = cameraPivot.forward;
         Vector3 camRight = cameraPivot.right;
 
@@ -284,6 +320,7 @@ public class PlayerController : MonoBehaviour
 
         Vector3 desiredWorldDir = (camRight * input.x) + (camForward * input.y);
 
+        // Snap the resulting vector to the nearest absolute cardinal axis.
         if (Mathf.Abs(desiredWorldDir.x) > Mathf.Abs(desiredWorldDir.z))
         {
             return desiredWorldDir.x > 0 ? Vector3Int.right : Vector3Int.left;
@@ -295,13 +332,13 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
-    // MAIN MOVEMENT LOGIC
+    // MOVEMENT ROUTER
     // =========================
     void HandleMovement()
     {
         Vector3Int dir = GetGridDirection(moveInput);
 
-        // NEW: If the player lets go of the stick, unlock their input
+        // Reset execution locks and timers when the user fully releases the movement axis.
         if (dir == Vector3Int.zero)
         {
             moveHoldTime = 0f;
@@ -309,7 +346,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // NEW: Block all moving/turning logic until they let go of the button
+        // Halt positional logic if a strict drop interaction recently occurred and input hasn't been reset.
         if (dropInputLock) return;
 
         moveHoldTime += Time.deltaTime;
@@ -327,6 +364,7 @@ public class PlayerController : MonoBehaviour
         Vector3Int front = gridPosition + currentFacing;
         bool isGrabbing = interactHeld && HasBlock(front);
 
+        // Distinguish between a quick directional tap (turning in place) and a deliberate hold (spatial movement).
         if (moveHoldTime < holdThreshold)
         {
             if (!isGrabbing && currentFacing != dir)
@@ -343,11 +381,11 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
-    // HANGING MOVEMENT
+    // HANGING LOGIC
     // =========================
     void TryHangMovement(Vector3Int dir)
     {
-        // 1. CLIMB UP
+        // 1. Climb up the ledge if attempting to move forward into the block.
         if (dir == currentFacing)
         {
             Vector3Int standPos = gridPosition + currentFacing + Vector3Int.up;
@@ -362,11 +400,11 @@ public class PlayerController : MonoBehaviour
                 RotatePlayer(currentFacing);
             }
         }
-        // 2. DROP DOWN
+        // 2. Detach from the ledge and initiate a downward drop.
         else if (dir == -currentFacing)
         {
             isHanging = false;
-            dropInputLock = true; // NEW: Lock their input right after dropping!
+            dropInputLock = true;
             UpdateArmsState();
 
             Vector3Int searchPos = gridPosition;
@@ -397,7 +435,7 @@ public class PlayerController : MonoBehaviour
                 Destroy(gameObject);
             }
         }
-        // 3. SHIMMY
+        // 3. Shimmy laterally along the ledge plane.
         else
         {
             float dot = Vector3.Dot((Vector3)dir, (Vector3)currentFacing);
@@ -408,11 +446,13 @@ public class PlayerController : MonoBehaviour
                 Vector3Int targetHeadPos = targetPos + Vector3Int.up;
                 Vector3Int targetGrabBlock = targetPos + currentFacing;
 
+                // Move laterally if the adjacent space is clear but retains a block to hold.
                 if (!HasBlock(targetPos) && !HasBlock(targetHeadPos) && HasBlock(targetGrabBlock))
                 {
                     gridPosition = targetPos;
                     transform.position = gridPosition;
                 }
+                // Wrap around outer corners dynamically.
                 else if (!HasBlock(targetPos) && !HasBlock(targetHeadPos) && !HasBlock(targetGrabBlock))
                 {
                     Vector3Int diagonalPos = targetPos + currentFacing;
@@ -426,6 +466,7 @@ public class PlayerController : MonoBehaviour
                         RotatePlayer(currentFacing);
                     }
                 }
+                // Handle inward corners.
                 else if (HasBlock(targetPos))
                 {
                     currentFacing = dir;
@@ -436,12 +477,13 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
-    // MOVE OR PUSH/PULL
+    // INTERACTION DECISION
     // =========================
     void TryMoveOrPush(Vector3Int dir)
     {
         Vector3Int front = gridPosition + currentFacing;
 
+        // Resolve push/pull block manipulation before resolving standard physical movement.
         if (interactHeld && HasBlock(front))
         {
             float dot = Vector3.Dot((Vector3)dir, (Vector3)currentFacing);
@@ -474,14 +516,16 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
-    // BASIC MOVEMENT
+    // STANDARD TRAVERSAL
     // =========================
     void TryMove(Vector3Int dir)
     {
         Vector3Int target = gridPosition + dir;
 
+        // Reject movement if obstructed by geometry at head/body level.
         if (HasBlock(target)) return;
 
+        // Commit standard linear displacement if geometry exists to stand on.
         if (CanStand(target))
         {
             gridPosition = target;
@@ -489,6 +533,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
+            // If traversing into an empty spatial column, transition into a ledge hang.
             Vector3Int targetDown = target + Vector3Int.down;
 
             if (!HasBlock(target) && !HasBlock(targetDown))
@@ -505,7 +550,7 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
-    // CLIMB UP
+    // UPWARD CLIMBING
     // =========================
     bool CanClimb(Vector3Int dir)
     {
@@ -513,6 +558,7 @@ public class PlayerController : MonoBehaviour
         Vector3Int aboveFront = front + Vector3Int.up;
         Vector3Int abovePlayer = gridPosition + Vector3Int.up;
 
+        // Requires a solid block in front, and unobstructed vertical clearance for both origin and destination.
         return HasBlock(front) && !HasBlock(aboveFront) && !HasBlock(abovePlayer);
     }
 
@@ -525,12 +571,14 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
-    // CLIMB DOWN
+    // DOWNWARD CLIMBING
     // =========================
     bool CanClimbDown(Vector3Int dir)
     {
         Vector3Int front = gridPosition + dir;
         Vector3Int frontDown = front + Vector3Int.down;
+
+        // Requires adjacent empty space cascading down into a solid block.
         return !HasBlock(front) && !HasBlock(frontDown) && CanStand(frontDown);
     }
 
@@ -542,13 +590,14 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
-    // PUSH
+    // KINEMATIC PUSHING
     // =========================
     void PushBlock(Vector3Int startBlockPos, Vector3Int dir)
     {
         List<Transform> blocksToMove = new List<Transform>();
         Vector3Int checkPos = startBlockPos;
 
+        // Iteratively scan outward along the requested vector to calculate potential multi-block push chains.
         while (HasBlock(checkPos))
         {
             Collider[] hits = Physics.OverlapBox(
@@ -560,12 +609,13 @@ public class PlayerController : MonoBehaviour
 
             if (hits.Length > 0)
             {
-                if (hits[0].CompareTag("Immovable")) return;
+                if (hits[0].CompareTag("Immovable")) return; // Halt entire operation if an anchor block is detected.
                 blocksToMove.Add(hits[0].transform);
             }
             checkPos += dir;
         }
 
+        // Commit positional translation for all queued blocks if the final adjacent tile is void.
         if (!HasBlock(checkPos))
         {
             for (int i = blocksToMove.Count - 1; i >= 0; i--)
@@ -578,7 +628,7 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
-    // PULL
+    // KINEMATIC PULLING
     // =========================
     void PullBlock(Vector3Int blockPos, Vector3Int dir)
     {
@@ -593,12 +643,13 @@ public class PlayerController : MonoBehaviour
 
         Vector3Int behind = gridPosition - currentFacing;
 
+        // Verify the coordinate behind the player is empty to accommodate the backward displacement.
         if (!HasBlock(behind))
         {
             SpawnDust(blockPos);
-
             MoveBlock(blockPos, gridPosition);
 
+            // Back-step seamlessly if geometry exists; otherwise, gracefully fail into a ledge hang.
             if (CanStand(behind))
             {
                 gridPosition = behind;
@@ -618,7 +669,7 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
-    // BLOCK DETECTION
+    // GRID QUERIES
     // =========================
     bool HasBlock(Vector3Int pos)
     {
@@ -636,7 +687,7 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
-    // BLOCK MOVEMENT
+    // KINEMATIC TRANSLATION
     // =========================
     void MoveBlock(Vector3Int from, Vector3Int to)
     {
@@ -655,12 +706,13 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
-    // ROTATION (With Hang Tilt)
+    // ROTATION HANDLER
     // =========================
     void RotatePlayer(Vector3Int dir)
     {
         Vector3 forward = new Vector3(dir.x, 0, dir.z);
 
+        // Apply a distinct pitch offset to physically align the player model against the wall when hanging.
         if (isHanging)
         {
             transform.rotation = Quaternion.LookRotation(forward) * Quaternion.Euler(15f, 0, 0);
@@ -672,18 +724,20 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================
-    // CAMERA
+    // CAMERA CONTROLLER
     // =========================
     void HandleCamera()
     {
         if (cameraPivot == null) return;
 
+        // Rotate the primary pivot via manual right-stick input.
         if (GameManager.Instance != null && GameManager.Instance.isPlaying)
         {
             float rotation = lookInput.x * cameraSpeed * Time.deltaTime;
             cameraPivot.Rotate(Vector3.up, rotation);
         }
 
+        // Linearly interpolate the pivot position to fluidly follow player displacement without rigid locking.
         Vector3 targetPos = transform.position;
         cameraPivot.position = Vector3.Lerp(cameraPivot.position, targetPos, cameraFollowSpeed * Time.deltaTime);
     }
