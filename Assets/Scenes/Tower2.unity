@@ -2920,7 +2920,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1547859667}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
         m_MethodName: OnTechniqueYesPressed
         m_Mode: 1
@@ -3418,8 +3418,8 @@ MonoBehaviour:
   goldSprite: {fileID: 21300000, guid: f4fb0987bfa8cfd4684fb31376da2178, type: 3}
   silverSprite: {fileID: 21300000, guid: 2d615bd9df2024843b455cb92251d66d, type: 3}
   bronzeSprite: {fileID: 21300000, guid: dfc4938cd04288c41acd4b7af7a0226d, type: 3}
-  goldTimeLimit: 60
-  silverTimeLimit: 80
+  goldTimeLimit: 70
+  silverTimeLimit: 85
   isPlaying: 0
 --- !u!4 &1547859668
 Transform:
@@ -3767,7 +3767,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1547859667}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
         m_MethodName: OnTechniqueNoPressed
         m_Mode: 1
