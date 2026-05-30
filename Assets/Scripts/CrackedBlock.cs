@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
+[RequireComponent(typeof(AudioSource))] // Ensures an AudioSource is automatically added
 public class CrackedBlock : MonoBehaviour
 {
     [Header("Settings")]
@@ -11,20 +12,39 @@ public class CrackedBlock : MonoBehaviour
     // Material applied to represent visual degradation when the block enters a damaged state.
     public Material crackMat2;
 
+    [Header("Audio Settings")]
+    [Tooltip("Sound played every time the block is stepped on.")]
+    public AudioClip crackSound;
+    [Tooltip("Sound played when the block finally crumbles.")]
+    public AudioClip disintegrateSound;
+
     private int stepCount = 0;
     private bool isDestroying = false;
     private Renderer blockRenderer;
+    private Collider blockCollider;
+    private AudioSource audioSource;
 
     void Awake()
     {
-        // Cache the local renderer component to avoid runtime lookup overhead.
+        // Cache local components to avoid runtime lookup overhead.
         blockRenderer = GetComponent<Renderer>();
+        blockCollider = GetComponent<Collider>();
+        audioSource = GetComponent<AudioSource>();
+
+        // Ensure the AudioSource doesn't play anything on startup
+        audioSource.playOnAwake = false;
     }
 
     public void OnStepped()
     {
         // Guard against redundant execution if the destruction sequence is already active.
         if (isDestroying) return;
+
+        // Play the cracking sound immediately upon interaction
+        if (crackSound != null)
+        {
+            audioSource.PlayOneShot(crackSound);
+        }
 
         stepCount++;
 
@@ -48,6 +68,23 @@ public class CrackedBlock : MonoBehaviour
     {
         // Provide a brief temporal window for player traversal or reaction before object disposal.
         yield return new WaitForSeconds(0.8f);
-        Destroy(gameObject);
+
+        // Play the disintegration sound
+        if (disintegrateSound != null)
+        {
+            audioSource.PlayOneShot(disintegrateSound);
+
+            // Hide the block and disable collision so the player falls through
+            if (blockRenderer != null) blockRenderer.enabled = false;
+            if (blockCollider != null) blockCollider.enabled = false;
+
+            // Delay the actual destruction of the GameObject until the audio clip finishes playing
+            Destroy(gameObject, disintegrateSound.length);
+        }
+        else
+        {
+            // Fallback if no audio clip is assigned
+            Destroy(gameObject);
+        }
     }
 }

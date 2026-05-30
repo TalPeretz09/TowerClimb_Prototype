@@ -5,6 +5,7 @@ using System.Collections;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(AudioSource))] // Automatically ensures an AudioSource is attached to your GameManager
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
@@ -35,15 +36,27 @@ public class GameManager : MonoBehaviour
     public float goldTimeLimit = 30f;
     public float silverTimeLimit = 60f;
 
+    [Header("Audio Settings")]
+    [Tooltip("Sound played when the player successfully beats the level.")]
+    public AudioClip winSound;
+    [Tooltip("Sound played when the player dies or fails the level.")]
+    public AudioClip loseSound;
+
     [Header("Game State")]
     public bool isPlaying = false;
     private float gameTimer = 0f;
+
+    private AudioSource audioSource; // Reference to the AudioSource component
 
     void Awake()
     {
         // Enforce the singleton lifecycle architecture pattern.
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+
+        // Cache the audio source and prevent it from playing randomly on load
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource != null) audioSource.playOnAwake = false;
     }
 
     void Start()
@@ -114,6 +127,12 @@ public class GameManager : MonoBehaviour
         if (!isPlaying) return;
 
         isPlaying = false;
+
+        // Play the Win Sound Effect
+        if (winSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(winSound);
+        }
 
         if (timerText != null) timerText.gameObject.SetActive(false);
         if (trophyUIImage != null) trophyUIImage.gameObject.SetActive(false);
@@ -194,6 +213,12 @@ public class GameManager : MonoBehaviour
     public void LoseGame()
     {
         isPlaying = false;
+
+        // Play the Lose Sound Effect
+        if (loseSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(loseSound);
+        }
 
         if (timerText != null) timerText.gameObject.SetActive(false);
         if (trophyUIImage != null) trophyUIImage.gameObject.SetActive(false);

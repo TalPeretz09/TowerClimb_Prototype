@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
+[RequireComponent(typeof(AudioSource))] // Automatically attaches an AudioSource to the Player
 public class PlayerController : MonoBehaviour
 {
     // =========================
@@ -55,8 +56,26 @@ public class PlayerController : MonoBehaviour
     private Vector3 originalArmsPos;
     private Quaternion originalArmsRot;
 
+    // =========================
+    // AUDIO SETTINGS
+    // =========================
+    [Header("Audio Settings")]
+    public AudioClip moveSound;
+    public AudioClip climbUpSound;
+    public AudioClip climbDownSound;
+    public AudioClip blockMoveSound;
+    public AudioClip hangSound;
+    public AudioClip shimmySound;
+    public AudioClip fallSound;
+
+    private AudioSource audioSource;
+
     void Awake()
     {
+        // Initialize Audio Source
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource != null) audioSource.playOnAwake = false;
+
         // Initialize the Input System and subscribe to standard context events.
         input = new PlayerInputActions();
 
@@ -202,11 +221,17 @@ public class PlayerController : MonoBehaviour
                 gridPosition = searchPos;
                 transform.position = gridPosition;
 
+                // Play fall sound when landing from gravity adjustment
+                if (fallSound != null) audioSource.PlayOneShot(fallSound);
+
                 // Reset the interaction cache to ensure traps register the new vertical arrival.
                 lastStandingPos = new Vector3Int(9999, 9999, 9999);
             }
             else
             {
+                // Play fall sound when plummeting into the void
+                if (fallSound != null) audioSource.PlayOneShot(fallSound);
+
                 // Trigger loss state if the downward cast exceeds expected world bounds (falling into the void).
                 if (GameManager.Instance != null)
                 {
@@ -398,6 +423,9 @@ public class PlayerController : MonoBehaviour
                 gridPosition = standPos;
                 transform.position = gridPosition;
                 RotatePlayer(currentFacing);
+
+                // Re-using climbUpSound since pulling up from a hang is essentially climbing up
+                if (climbUpSound != null) audioSource.PlayOneShot(climbUpSound);
             }
         }
         // 2. Detach from the ledge and initiate a downward drop.
@@ -425,9 +453,15 @@ public class PlayerController : MonoBehaviour
                 gridPosition = searchPos;
                 transform.position = gridPosition;
                 RotatePlayer(currentFacing);
+
+                // Play fall sound when dropping from a ledge onto a solid floor
+                if (fallSound != null) audioSource.PlayOneShot(fallSound);
             }
             else
             {
+                // Play fall sound when dropping off the tower entirely
+                if (fallSound != null) audioSource.PlayOneShot(fallSound);
+
                 if (GameManager.Instance != null)
                 {
                     GameManager.Instance.LoseGame();
@@ -446,11 +480,14 @@ public class PlayerController : MonoBehaviour
                 Vector3Int targetHeadPos = targetPos + Vector3Int.up;
                 Vector3Int targetGrabBlock = targetPos + currentFacing;
 
+                bool didShimmy = false;
+
                 // Move laterally if the adjacent space is clear but retains a block to hold.
                 if (!HasBlock(targetPos) && !HasBlock(targetHeadPos) && HasBlock(targetGrabBlock))
                 {
                     gridPosition = targetPos;
                     transform.position = gridPosition;
+                    didShimmy = true;
                 }
                 // Wrap around outer corners dynamically.
                 else if (!HasBlock(targetPos) && !HasBlock(targetHeadPos) && !HasBlock(targetGrabBlock))
@@ -464,6 +501,7 @@ public class PlayerController : MonoBehaviour
                         currentFacing = -dir;
                         transform.position = gridPosition;
                         RotatePlayer(currentFacing);
+                        didShimmy = true;
                     }
                 }
                 // Handle inward corners.
@@ -471,6 +509,12 @@ public class PlayerController : MonoBehaviour
                 {
                     currentFacing = dir;
                     RotatePlayer(currentFacing);
+                    didShimmy = true;
+                }
+
+                if (didShimmy && shimmySound != null)
+                {
+                    audioSource.PlayOneShot(shimmySound);
                 }
             }
         }
@@ -530,6 +574,9 @@ public class PlayerController : MonoBehaviour
         {
             gridPosition = target;
             transform.position = gridPosition;
+
+            // Play movement sound
+            if (moveSound != null) audioSource.PlayOneShot(moveSound);
         }
         else
         {
@@ -545,6 +592,9 @@ public class PlayerController : MonoBehaviour
                 currentFacing = -dir;
                 transform.position = gridPosition;
                 RotatePlayer(currentFacing);
+
+                // Play hang transition sound
+                if (hangSound != null) audioSource.PlayOneShot(hangSound);
             }
         }
     }
@@ -568,6 +618,9 @@ public class PlayerController : MonoBehaviour
         Vector3Int aboveFront = front + Vector3Int.up;
         gridPosition = aboveFront;
         transform.position = gridPosition;
+
+        // Play climb up sound
+        if (climbUpSound != null) audioSource.PlayOneShot(climbUpSound);
     }
 
     // =========================
@@ -587,6 +640,9 @@ public class PlayerController : MonoBehaviour
         Vector3Int frontDown = gridPosition + dir + Vector3Int.down;
         gridPosition = frontDown;
         transform.position = gridPosition;
+
+        // Play climb down sound
+        if (climbDownSound != null) audioSource.PlayOneShot(climbDownSound);
     }
 
     // =========================
@@ -618,6 +674,9 @@ public class PlayerController : MonoBehaviour
         // Commit positional translation for all queued blocks if the final adjacent tile is void.
         if (!HasBlock(checkPos))
         {
+            // Play block move sound once per successful push action
+            if (blockMoveSound != null) audioSource.PlayOneShot(blockMoveSound);
+
             for (int i = blocksToMove.Count - 1; i >= 0; i--)
             {
                 SpawnDust(blocksToMove[i].position);
@@ -646,6 +705,9 @@ public class PlayerController : MonoBehaviour
         // Verify the coordinate behind the player is empty to accommodate the backward displacement.
         if (!HasBlock(behind))
         {
+            // Play block move sound
+            if (blockMoveSound != null) audioSource.PlayOneShot(blockMoveSound);
+
             SpawnDust(blockPos);
             MoveBlock(blockPos, gridPosition);
 
@@ -663,6 +725,9 @@ public class PlayerController : MonoBehaviour
                 gridPosition = behind + Vector3Int.down;
                 transform.position = gridPosition;
                 RotatePlayer(currentFacing);
+
+                // Play hang transition sound since pulling it caused a drop
+                if (hangSound != null) audioSource.PlayOneShot(hangSound);
             }
             Physics.SyncTransforms();
         }
